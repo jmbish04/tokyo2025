@@ -104,6 +104,250 @@ const tools = {
       return results;
     },
   }),
+
+  queryLogs: tool({
+    description: 'Query application logs to debug issues, find errors, or analyze system behavior. Can filter by level, endpoint, time range, etc.',
+    parameters: z.object({
+      logType: z.enum(['app', 'api', 'error', 'ai', 'performance']).describe('Type of logs to query'),
+      level: z.enum(['debug', 'info', 'warn', 'error', 'fatal']).optional().describe('Log level filter (for app logs)'),
+      endpoint: z.string().optional().describe('Filter by specific API endpoint'),
+      limit: z.number().optional().default(10).describe('Number of log entries to return (max 50)'),
+      timeRange: z.enum(['1h', '6h', '24h', '7d', '30d']).optional().default('24h').describe('Time range for logs'),
+    }),
+    execute: async ({ logType, level, endpoint, limit, timeRange }, { DB }: { DB: D1Database }) => {
+      // Calculate time filter based on range
+      const timeFilters: Record<string, string> = {
+        '1h': "datetime('now', '-1 hour')",
+        '6h': "datetime('now', '-6 hours')",
+        '24h': "datetime('now', '-24 hours')",
+        '7d': "datetime('now', '-7 days')",
+        '30d': "datetime('now', '-30 days')",
+      };
+
+      const timeFilter = timeFilters[timeRange || '24h'];
+      const maxLimit = Math.min(limit || 10, 50);
+
+      let sql = '';
+      let bindings: any[] = [];
+
+      switch (logType) {
+        case 'app':
+          sql = `SELECT * FROM app_logs WHERE timestamp >= ${timeFilter}`;
+          if (level) {
+            sql += ' AND level = ?';
+            bindings.push(level);
+          }
+          if (endpoint) {
+            sql += ' AND endpoint LIKE ?';
+            bindings.push(`%${endpoint}%`);
+          }
+          sql += ' ORDER BY timestamp DESC LIMIT ?';
+          bindings.push(maxLimit);
+          break;
+
+        case 'api':
+          sql = `SELECT * FROM api_logs WHERE timestamp >= ${timeFilter}`;
+          if (endpoint) {
+            sql += ' AND endpoint LIKE ?';
+            bindings.push(`%${endpoint}%`);
+          }
+          sql += ' ORDER BY timestamp DESC LIMIT ?';
+          bindings.push(maxLimit);
+          break;
+
+        case 'error':
+          sql = `SELECT * FROM error_logs WHERE timestamp >= ${timeFilter}`;
+          if (endpoint) {
+            sql += ' AND endpoint LIKE ?';
+            bindings.push(`%${endpoint}%`);
+          }
+          sql += ' ORDER BY timestamp DESC LIMIT ?';
+          bindings.push(maxLimit);
+          break;
+
+        case 'ai':
+          sql = `SELECT * FROM ai_logs WHERE timestamp >= ${timeFilter}`;
+          sql += ' ORDER BY timestamp DESC LIMIT ?';
+          bindings.push(maxLimit);
+          break;
+
+        case 'performance':
+          sql = `SELECT * FROM performance_metrics WHERE timestamp >= ${timeFilter}`;
+          if (endpoint) {
+            sql += ' AND endpoint LIKE ?';
+            bindings.push(`%${endpoint}%`);
+          }
+          sql += ' ORDER BY timestamp DESC LIMIT ?';
+          bindings.push(maxLimit);
+          break;
+      }
+
+      const { results } = await (DB as D1Database).prepare(sql).bind(...bindings).all();
+      return results;
+    },
+  }),
+
+  examineTable: tool({
+    description: 'Examine D1 database tables - get schema, row counts, sample data, or run custom SQL queries for analysis',
+    parameters: z.object({
+      operation: z.enum(['list_tables', 'table_info', 'row_count', 'sample_data', 'custom_query']).describe('Operation to perform'),
+      tableName: z.string().optional().describe('Table name (required for table_info, row_count, sample_data)'),
+      customQuery: z.string().optional().describe('Custom SQL query (SELECT only, for custom_query operation)'),
+      limit: z.number().optional().default(5).describe('Number of sample rows to return'),
+    }),
+    execute: async ({ operation, tableName, customQuery, limit }, { DB }: { DB: D1Database }) => {
+      const maxLimit = Math.min(limit || 5, 20);
+
+      switch (operation) {
+        case 'list_tables': {
+          const { results } = await (DB as D1Database)
+            .prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+            .all();
+          return results;
+        }
+
+        case 'table_info': {
+          if (!tableName) throw new Error('tableName required for table_info');
+          const { results } = await (DB as D1Database)
+            .prepare(`PRAGMA table_info(${tableName})`)
+            .all();
+          return results;
+        }
+
+        case 'row_count': {
+          if (!tableName) throw new Error('tableName required for row_count');
+          const { results } = await (DB as D1Database)
+            .prepare(`SELECT COUNT(*) as count FROM ${tableName}`)
+            .all();
+          return results;
+        }
+
+        case 'sample_data': {
+          if (!tableName) throw new Error('tableName required for sample_data');
+          const { results } = await (DB as D1Database)
+            .prepare(`SELECT * FROM ${tableName} LIMIT ?`)
+            .bind(maxLimit)
+            .all();
+          return results;
+        }
+
+        case 'custom_query': {
+          if (!customQuery) throw new Error('customQuery required for custom_query');
+          // Security: Only allow SELECT queries
+          if (!customQuery.trim().toLowerCase().startsWith('select')) {
+            throw new Error('Only SELECT queries are allowed');
+          }
+          const { results } = await (DB as D1Database)
+            .prepare(customQuery)
+            .all();
+          return results;
+        }
+
+        default:
+          throw new Error(`Unknown operation: ${operation}`);
+      }
+    },
+  }),
+
+  getSystemStats: tool({
+    description: 'Get system statistics: error rates, API performance, AI usage, database health metrics',
+    parameters: z.object({
+      metric: z.enum(['error_rate', 'api_performance', 'ai_usage', 'database_stats', 'recent_errors']).describe('Metric to retrieve'),
+      timeRange: z.enum(['1h', '6h', '24h', '7d']).optional().default('24h').describe('Time range'),
+    }),
+    execute: async ({ metric, timeRange }, { DB }: { DB: D1Database }) => {
+      const timeFilters: Record<string, string> = {
+        '1h': "datetime('now', '-1 hour')",
+        '6h': "datetime('now', '-6 hours')",
+        '24h': "datetime('now', '-24 hours')",
+        '7d': "datetime('now', '-7 days')",
+      };
+
+      const timeFilter = timeFilters[timeRange || '24h'];
+
+      switch (metric) {
+        case 'error_rate': {
+          const { results } = await (DB as D1Database)
+            .prepare(`
+              SELECT
+                COUNT(*) as total_errors,
+                SUM(CASE WHEN resolved = 1 THEN 1 ELSE 0 END) as resolved_errors,
+                error_type,
+                COUNT(*) as count
+              FROM error_logs
+              WHERE timestamp >= ${timeFilter}
+              GROUP BY error_type
+              ORDER BY count DESC
+            `)
+            .all();
+          return results;
+        }
+
+        case 'api_performance': {
+          const { results } = await (DB as D1Database)
+            .prepare(`
+              SELECT
+                endpoint,
+                COUNT(*) as total_requests,
+                AVG(duration_ms) as avg_duration,
+                MAX(duration_ms) as max_duration,
+                SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) as error_count
+              FROM api_logs
+              WHERE timestamp >= ${timeFilter}
+              GROUP BY endpoint
+              ORDER BY total_requests DESC
+            `)
+            .all();
+          return results;
+        }
+
+        case 'ai_usage': {
+          const { results } = await (DB as D1Database)
+            .prepare(`
+              SELECT
+                model,
+                provider,
+                COUNT(*) as total_requests,
+                SUM(total_tokens) as total_tokens,
+                AVG(duration_ms) as avg_duration
+              FROM ai_logs
+              WHERE timestamp >= ${timeFilter}
+              GROUP BY model, provider
+              ORDER BY total_requests DESC
+            `)
+            .all();
+          return results;
+        }
+
+        case 'database_stats': {
+          const tables = ['venues', 'chats', 'messages', 'app_logs', 'api_logs', 'error_logs', 'ai_logs'];
+          const stats = [];
+          for (const table of tables) {
+            const { results } = await (DB as D1Database)
+              .prepare(`SELECT COUNT(*) as count FROM ${table}`)
+              .all();
+            stats.push({ table, count: results[0]?.count || 0 });
+          }
+          return stats;
+        }
+
+        case 'recent_errors': {
+          const { results } = await (DB as D1Database)
+            .prepare(`
+              SELECT * FROM error_logs
+              WHERE timestamp >= ${timeFilter}
+              ORDER BY timestamp DESC
+              LIMIT 10
+            `)
+            .all();
+          return results;
+        }
+
+        default:
+          throw new Error(`Unknown metric: ${metric}`);
+      }
+    },
+  }),
 };
 
 /**
@@ -206,6 +450,18 @@ export async function POST(request: NextRequest) {
         searchVenues: {
           ...tools.searchVenues,
           execute: async (params) => tools.searchVenues.execute(params, { DB: env.DB }),
+        },
+        queryLogs: {
+          ...tools.queryLogs,
+          execute: async (params) => tools.queryLogs.execute(params, { DB: env.DB }),
+        },
+        examineTable: {
+          ...tools.examineTable,
+          execute: async (params) => tools.examineTable.execute(params, { DB: env.DB }),
+        },
+        getSystemStats: {
+          ...tools.getSystemStats,
+          execute: async (params) => tools.getSystemStats.execute(params, { DB: env.DB }),
         },
       },
       maxTokens: modelConfig.maxTokens,

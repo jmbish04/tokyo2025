@@ -159,6 +159,31 @@ export default function Home() {
           >
             🌱 Manage Venues
           </Link>
+          <Link
+            href="/logs"
+            style={{
+              display: 'inline-block',
+              padding: '0.75rem 1.5rem',
+              background: 'var(--bg-tertiary)',
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              border: '1px solid var(--border)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.background = 'var(--accent)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.background = 'var(--bg-tertiary)';
+            }}
+          >
+            📊 System Logs & Monitoring
+          </Link>
         </div>
       </header>
 
