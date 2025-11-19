@@ -4,14 +4,15 @@ import type { AIProvider } from './ai-config';
 
 interface Env {
   AI: any;
-  OPENAI_API_KEY?: string;
-  GOOGLE_API_KEY?: string;
+  OPENAI_API_KEY: { get: () => Promise<string> };
+  GOOGLE_API_KEY: { get: () => Promise<string> };
 }
 
 /**
  * Get AI model instance based on provider and model ID
+ * Now uses Secrets Store bindings (async)
  */
-export function getAIModel(provider: AIProvider, modelId: string, env: Env) {
+export async function getAIModel(provider: AIProvider, modelId: string, env: Env) {
   switch (provider) {
     case 'workers-ai':
       return {
@@ -20,21 +21,29 @@ export function getAIModel(provider: AIProvider, modelId: string, env: Env) {
         binding: env.AI,
       };
 
-    case 'openai':
-      if (!env.OPENAI_API_KEY) {
+    case 'openai': {
+      const openaiKey = await env.OPENAI_API_KEY.get();
+      console.log('[DEBUG] OPENAI_API_KEY loaded:', openaiKey ? `${openaiKey.substring(0, 4)}...` : 'UNDEFINED');
+
+      if (!openaiKey) {
         throw new Error('OpenAI API key not configured');
       }
       return openai(modelId, {
-        apiKey: env.OPENAI_API_KEY,
+        apiKey: openaiKey,
       });
+    }
 
-    case 'gemini':
-      if (!env.GOOGLE_API_KEY) {
+    case 'gemini': {
+      const googleKey = await env.GOOGLE_API_KEY.get();
+      console.log('[DEBUG] GOOGLE_API_KEY loaded:', googleKey ? `${googleKey.substring(0, 4)}...` : 'UNDEFINED');
+
+      if (!googleKey) {
         throw new Error('Google API key not configured');
       }
       return google(modelId, {
-        apiKey: env.GOOGLE_API_KEY,
+        apiKey: googleKey,
       });
+    }
 
     default:
       throw new Error(`Unknown provider: ${provider}`);

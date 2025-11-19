@@ -10,8 +10,8 @@ export const runtime = 'edge';
 interface Env {
   DB: D1Database;
   AI: any;
-  OPENAI_API_KEY?: string;
-  GOOGLE_API_KEY?: string;
+  OPENAI_API_KEY: { get: () => Promise<string> };
+  GOOGLE_API_KEY: { get: () => Promise<string> };
 }
 
 /**
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       systemPrompt,
     } = body;
 
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
 
     if (!env.DB) {
       return new Response('Database not configured', { status: 500 });
@@ -128,8 +128,8 @@ export async function POST(request: NextRequest) {
     // Get model configuration
     const modelConfig = getModelConfig(model);
 
-    // Get the appropriate AI model instance
-    const aiModel = getAIModel(modelConfig.provider, modelConfig.id, env);
+    // Get the appropriate AI model instance (now async)
+    const aiModel = await getAIModel(modelConfig.provider, modelConfig.id, env);
 
     // Build messages array with system prompt
     const fullMessages = [
@@ -246,7 +246,7 @@ export async function GET(request: NextRequest) {
       return new Response('Chat ID required', { status: 400 });
     }
 
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
 
     if (!env.DB) {
       return new Response('Database not configured', { status: 500 });

@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'edge';
 
 interface Env {
-  CLOUDFLARE_ACCOUNT_ID?: string;
-  CLOUDFLARE_API_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID: { get: () => Promise<string> };
+  CLOUDFLARE_API_TOKEN: { get: () => Promise<string> };
 }
 
 interface TransformOptions {
@@ -24,11 +24,24 @@ interface TransformOptions {
 }
 
 /**
+ * Helper function to get secrets from Secrets Store
+ */
+async function getSecretsWithLogging(env: Env) {
+  const accountId = await env.CLOUDFLARE_ACCOUNT_ID.get();
+  const apiToken = await env.CLOUDFLARE_API_TOKEN.get();
+
+  console.log('[DEBUG] CLOUDFLARE_ACCOUNT_ID loaded:', accountId ? `${accountId.substring(0, 4)}...` : 'UNDEFINED');
+  console.log('[DEBUG] CLOUDFLARE_API_TOKEN loaded:', apiToken ? `${apiToken.substring(0, 4)}...` : 'UNDEFINED');
+
+  return { accountId, apiToken };
+}
+
+/**
  * POST /api/images/transform - Create transformed variant of image
  */
 export async function POST(request: NextRequest) {
   try {
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
     const body = await request.json();
     const { imageId, variantName, options } = body as {
       imageId: string;
@@ -44,7 +57,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Variant name required' }, { status: 400 });
     }
 
-    if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN) {
+    // Retrieve secrets from Secrets Store
+    const { accountId, apiToken } = await getSecretsWithLogging(env);
+
+    if (!accountId || !apiToken) {
       return NextResponse.json(
         { error: 'Cloudflare Images not configured' },
         { status: 500 }
@@ -66,11 +82,11 @@ export async function POST(request: NextRequest) {
     if (options.format) variantConfig.options.format = options.format;
 
     // Create the variant
-    const createVariantUrl = `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/images/v1/variants`;
+    const createVariantUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1/variants`;
     const createResponse = await fetch(createVariantUrl, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+        Authorization: `Bearer ${apiToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(variantConfig),
@@ -88,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     // Build transformed image URL
     const transformedUrl = buildTransformedUrl(
-      env.CLOUDFLARE_ACCOUNT_ID,
+      accountId,
       imageId,
       variantName,
       options
@@ -118,7 +134,7 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
     const { searchParams } = new URL(request.url);
     const imageId = searchParams.get('imageId');
     const width = searchParams.get('width');
@@ -132,7 +148,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Image ID required' }, { status: 400 });
     }
 
-    if (!env.CLOUDFLARE_ACCOUNT_ID) {
+    // Retrieve account ID from Secrets Store
+    const accountId = await env.CLOUDFLARE_ACCOUNT_ID.get();
+    console.log('[DEBUG] CLOUDFLARE_ACCOUNT_ID loaded:', accountId ? `${accountId.substring(0, 4)}...` : 'UNDEFINED');
+
+    if (!accountId) {
       return NextResponse.json(
         { error: 'Cloudflare Images not configured' },
         { status: 500 }
@@ -149,7 +169,7 @@ export async function GET(request: NextRequest) {
     if (blur) options.blur = parseInt(blur);
 
     // Build URL with transformations
-    const baseUrl = `https://imagedelivery.net/${env.CLOUDFLARE_ACCOUNT_ID}/${imageId}`;
+    const baseUrl = `https://imagedelivery.net/${accountId}/${imageId}`;
     const params = new URLSearchParams();
 
     if (options.width) params.append('width', options.width.toString());

@@ -3,8 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'edge';
 
 interface Env {
-  CLOUDFLARE_ACCOUNT_ID?: string;
-  CLOUDFLARE_API_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID: { get: () => Promise<string> };
+  CLOUDFLARE_API_TOKEN: { get: () => Promise<string> };
+}
+
+/**
+ * Helper function to get secrets from Secrets Store
+ */
+async function getSecretsWithLogging(env: Env) {
+  const accountId = await env.CLOUDFLARE_ACCOUNT_ID.get();
+  const apiToken = await env.CLOUDFLARE_API_TOKEN.get();
+
+  console.log('[DEBUG] CLOUDFLARE_ACCOUNT_ID loaded:', accountId ? `${accountId.substring(0, 4)}...` : 'UNDEFINED');
+  console.log('[DEBUG] CLOUDFLARE_API_TOKEN loaded:', apiToken ? `${apiToken.substring(0, 4)}...` : 'UNDEFINED');
+
+  return { accountId, apiToken };
 }
 
 /**
@@ -12,9 +25,13 @@ interface Env {
  */
 export async function POST(request: NextRequest) {
   try {
-    const env = process.env as unknown as Env;
+    // Get env from globalThis (set by worker.ts)
+    const env = (globalThis as any).env as Env;
 
-    if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN) {
+    // Retrieve secrets from Secrets Store
+    const { accountId, apiToken } = await getSecretsWithLogging(env);
+
+    if (!accountId || !apiToken) {
       return NextResponse.json(
         { error: 'Cloudflare Images not configured. Please set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN.' },
         { status: 500 }
@@ -55,11 +72,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload to Cloudflare Images
-    const uploadUrl = `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/images/v1`;
+    const uploadUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1`;
     const uploadResponse = await fetch(uploadUrl, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+        Authorization: `Bearer ${apiToken}`,
       },
       body: uploadFormData,
     });
@@ -110,7 +127,7 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
     const { searchParams } = new URL(request.url);
     const imageId = searchParams.get('imageId');
 
@@ -118,7 +135,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Image ID required' }, { status: 400 });
     }
 
-    if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN) {
+    // Retrieve secrets from Secrets Store
+    const { accountId, apiToken } = await getSecretsWithLogging(env);
+
+    if (!accountId || !apiToken) {
       return NextResponse.json(
         { error: 'Cloudflare Images not configured' },
         { status: 500 }
@@ -126,10 +146,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Get image details from Cloudflare Images
-    const imageUrl = `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/images/v1/${imageId}`;
+    const imageUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1/${imageId}`;
     const imageResponse = await fetch(imageUrl, {
       headers: {
-        Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+        Authorization: `Bearer ${apiToken}`,
       },
     });
 
@@ -170,7 +190,7 @@ export async function GET(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
     const { searchParams } = new URL(request.url);
     const imageId = searchParams.get('imageId');
 
@@ -178,7 +198,10 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Image ID required' }, { status: 400 });
     }
 
-    if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN) {
+    // Retrieve secrets from Secrets Store
+    const { accountId, apiToken } = await getSecretsWithLogging(env);
+
+    if (!accountId || !apiToken) {
       return NextResponse.json(
         { error: 'Cloudflare Images not configured' },
         { status: 500 }
@@ -186,11 +209,11 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete image from Cloudflare Images
-    const deleteUrl = `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/images/v1/${imageId}`;
+    const deleteUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1/${imageId}`;
     const deleteResponse = await fetch(deleteUrl, {
       method: 'DELETE',
       headers: {
-        Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+        Authorization: `Bearer ${apiToken}`,
       },
     });
 

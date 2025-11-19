@@ -6,9 +6,9 @@ import { google } from '@ai-sdk/google';
 export const runtime = 'edge';
 
 interface Env {
-  OPENAI_API_KEY?: string;
-  GOOGLE_API_KEY?: string;
-  CLOUDFLARE_ACCOUNT_ID?: string;
+  OPENAI_API_KEY: { get: () => Promise<string> };
+  GOOGLE_API_KEY: { get: () => Promise<string> };
+  CLOUDFLARE_ACCOUNT_ID: { get: () => Promise<string> };
 }
 
 /**
@@ -16,7 +16,7 @@ interface Env {
  */
 export async function POST(request: NextRequest) {
   try {
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
     const body = await request.json();
     const {
       imageUrl,
@@ -32,27 +32,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine which vision model to use
+    // Determine which vision model to use and retrieve appropriate API key
     let visionModel: any;
     let modelProvider: 'openai' | 'gemini';
 
     if (model.startsWith('gpt-4')) {
-      if (!env.OPENAI_API_KEY) {
+      const openaiKey = await env.OPENAI_API_KEY.get();
+      console.log('[DEBUG] OPENAI_API_KEY loaded:', openaiKey ? `${openaiKey.substring(0, 4)}...` : 'UNDEFINED');
+
+      if (!openaiKey) {
         return NextResponse.json(
           { error: 'OpenAI API key not configured' },
           { status: 500 }
         );
       }
-      visionModel = openai('gpt-4-turbo', { apiKey: env.OPENAI_API_KEY });
+      visionModel = openai('gpt-4-turbo', { apiKey: openaiKey });
       modelProvider = 'openai';
     } else if (model.startsWith('gemini')) {
-      if (!env.GOOGLE_API_KEY) {
+      const googleKey = await env.GOOGLE_API_KEY.get();
+      console.log('[DEBUG] GOOGLE_API_KEY loaded:', googleKey ? `${googleKey.substring(0, 4)}...` : 'UNDEFINED');
+
+      if (!googleKey) {
         return NextResponse.json(
           { error: 'Google API key not configured' },
           { status: 500 }
         );
       }
-      visionModel = google('gemini-1.5-pro-latest', { apiKey: env.GOOGLE_API_KEY });
+      visionModel = google('gemini-1.5-pro-latest', { apiKey: googleKey });
       modelProvider = 'gemini';
     } else {
       return NextResponse.json(
@@ -63,9 +69,15 @@ export async function POST(request: NextRequest) {
 
     // Construct the final image URL
     let finalImageUrl = imageUrl;
-    if (imageId && env.CLOUDFLARE_ACCOUNT_ID) {
-      // Use Cloudflare Images URL with imageId
-      finalImageUrl = `https://imagedelivery.net/${env.CLOUDFLARE_ACCOUNT_ID}/${imageId}/public`;
+    if (imageId) {
+      // Retrieve Cloudflare Account ID for image URL construction
+      const accountId = await env.CLOUDFLARE_ACCOUNT_ID.get();
+      console.log('[DEBUG] CLOUDFLARE_ACCOUNT_ID loaded:', accountId ? `${accountId.substring(0, 4)}...` : 'UNDEFINED');
+
+      if (accountId) {
+        // Use Cloudflare Images URL with imageId
+        finalImageUrl = `https://imagedelivery.net/${accountId}/${imageId}/public`;
+      }
     }
 
     if (!finalImageUrl) {
