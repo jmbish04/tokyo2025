@@ -7,6 +7,7 @@ import { getAllModels, getModelConfig, type ModelConfig } from '@/lib/ai-config'
 import { WeatherCard } from '@/components/generative/weather-card';
 import { SubwayMap } from '@/components/generative/subway-map';
 import { AttractionCard } from '@/components/generative/attraction-card';
+import { ImageUpload } from '@/components/image-upload';
 import { format } from 'date-fns';
 
 interface Chat {
@@ -24,6 +25,7 @@ export default function ChatPage() {
   const [selectedModel, setSelectedModel] = useState('workers-ai-reasoning');
   const [showSidebar, setShowSidebar] = useState(true);
   const [loadingChats, setLoadingChats] = useState(true);
+  const [showImageUpload, setShowImageUpload] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, reload, stop } = useChat({
@@ -94,6 +96,15 @@ export default function ChatPage() {
   const loadChat = async (chatId: string) => {
     setCurrentChatId(chatId);
     // Messages will be loaded automatically by useChat
+  };
+
+  const handleImageAnalysis = (imageUrl: string, imageId: string, analysis?: string) => {
+    // Create a message with the image analysis
+    if (analysis) {
+      const imageMessage = `[Image uploaded: ${imageUrl}]\n\nAI Analysis:\n${analysis}`;
+      handleInputChange({ target: { value: imageMessage } } as any);
+    }
+    setShowImageUpload(false);
   };
 
   const models = getAllModels();
@@ -406,46 +417,77 @@ export default function ChatPage() {
             background: 'var(--bg-secondary)',
           }}
         >
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', maxWidth: '1200px', margin: '0 auto' }}>
-            <textarea
-              value={input}
-              onChange={handleInputChange}
-              placeholder="Ask me anything about Tokyo..."
-              rows={3}
-              style={{
-                flex: 1,
-                padding: '1rem',
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                color: 'var(--text-primary)',
-                fontSize: '0.9375rem',
-                resize: 'none',
-                outline: 'none',
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  e.currentTarget.form?.requestSubmit();
-                }
-              }}
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !input.trim()}
-              style={{
-                padding: '1rem 2rem',
-                background: isLoading || !input.trim() ? 'var(--border)' : 'var(--accent)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontWeight: 'bold',
-                cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
-                fontSize: '0.9375rem',
-              }}
-            >
-              {isLoading ? 'Thinking...' : 'Send'}
-            </button>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => setShowImageUpload(!showImageUpload)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: showImageUpload ? 'var(--accent)' : 'var(--bg-tertiary)',
+                  color: showImageUpload ? 'white' : 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                }}
+              >
+                📸 {showImageUpload ? 'Hide' : 'Upload Image'}
+              </button>
+            </div>
+
+            {showImageUpload && (
+              <div style={{ marginBottom: '1rem' }}>
+                <ImageUpload
+                  onImageUploaded={handleImageAnalysis}
+                  showAnalysis={true}
+                  analysisModel={selectedModel.startsWith('gemini') ? 'gemini-1.5-pro' : 'gpt-4-turbo'}
+                  analysisPrompt="Analyze this image in the context of Tokyo travel. What do you see? Is this a restaurant, attraction, or specific location? Provide helpful details for a traveler."
+                />
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
+              <textarea
+                value={input}
+                onChange={handleInputChange}
+                placeholder="Ask me anything about Tokyo..."
+                rows={3}
+                style={{
+                  flex: 1,
+                  padding: '1rem',
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '12px',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.9375rem',
+                  resize: 'none',
+                  outline: 'none',
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    e.currentTarget.form?.requestSubmit();
+                  }
+                }}
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                style={{
+                  padding: '1rem 2rem',
+                  background: isLoading || !input.trim() ? 'var(--border)' : 'var(--accent)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontWeight: 'bold',
+                  cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
+                  fontSize: '0.9375rem',
+                }}
+              >
+                {isLoading ? 'Thinking...' : 'Send'}
+              </button>
+            </div>
           </div>
         </form>
       </div>

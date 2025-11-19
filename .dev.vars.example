@@ -22,6 +22,20 @@ GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
 # Get your key: https://openweathermap.org/api
 # OPENWEATHER_API_KEY=your_openweather_api_key_here
 
+# AI Provider API Keys (for multi-model chat)
+# OpenAI API Key (for GPT-4, GPT-3.5 models)
+# Get your key: https://platform.openai.com
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Google Gemini API Key (for Gemini 1.5 Pro/Flash models)
+# Get your key: https://aistudio.google.com/app/apikey
+GOOGLE_API_KEY=your_google_api_key_here
+
+# Cloudflare Images (for image upload and editing)
+# Get from: https://dash.cloudflare.com > Account > Images
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+CLOUDFLARE_API_TOKEN=your_cloudflare_api_token
+
 # Development flags
 # DEBUG=true
 # LOG_LEVEL=debug
