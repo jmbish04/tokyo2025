@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const withCount = searchParams.get('withCount') === 'true';
 
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
 
     if (!env.DB) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
