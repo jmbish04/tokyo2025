@@ -11,9 +11,18 @@
     "db:create": "wrangler d1 create tokyo2025-db",
     "db:migrate": "wrangler d1 migrations apply tokyo2025-db",
     "db:migrate:local": "wrangler d1 migrations apply tokyo2025-db --local",
+    "db:query": "wrangler d1 execute tokyo2025-db --remote --command",
+    "db:query:local": "wrangler d1 execute tokyo2025-db --local --command",
     "kv:create": "wrangler kv:namespace create MEMORY",
     "cf:login": "wrangler login",
-    "cf:init": "npm run db:create && npm run kv:create"
+    "cf:init": "npm run db:create && npm run kv:create",
+    "secret:set": "wrangler secret put",
+    "secret:list": "wrangler secret list",
+    "seed:setup": "echo 'Run: npm run secret:set GOOGLE_PLACES_API_KEY' && echo 'Then enter your API key when prompted'",
+    "seed:status": "curl http://localhost:8787/api/seed",
+    "seed:ginza": "node src/scripts/seed-cli.js ginza",
+    "seed:osaka": "node src/scripts/seed-cli.js osaka",
+    "seed:all": "node src/scripts/seed-cli.js all"
   },
   "dependencies": {
     "next": "^14.2.0",

@@ -5,7 +5,9 @@ AI-powered travel assistant for exploring Tokyo, built on Cloudflare Workers wit
 ## Features
 
 - **AI Chat Assistant**: Powered by Cloudflare Workers AI (Llama 3 8B)
+- **Auto-Seeding**: Populate database with real venues from Google Places API
 - **Venue Database**: Curated collection of Tokyo's best spots (D1 Database)
+- **Ginza & Osaka Focus**: Pre-configured for luxury shopping in Ginza and street food in Osaka
 - **Image Upload**: Store and analyze travel photos (Cloudflare Images)
 - **Chat Memory**: Short-term (KV) and long-term (D1) conversation storage
 - **Weather Maps**: AI-generated weather visualizations
@@ -95,6 +97,37 @@ npm run build
 # Deploy to Cloudflare Workers
 npm run deploy
 ```
+
+### 7. Auto-Seed Venues (Optional but Recommended!)
+
+Populate your database with real Ginza and Osaka venues from Google Places API.
+
+#### Quick Setup (5 minutes)
+
+1. **Get Google Places API Key**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com)
+   - Create project → Enable "Places API"
+   - Create API Key
+
+2. **Set Secret**:
+   ```bash
+   npx wrangler secret put GOOGLE_PLACES_API_KEY
+   # Paste your key when prompted
+   ```
+
+3. **Seed Database**:
+   ```bash
+   # Seed both Ginza and Osaka
+   npm run seed:all
+
+   # Or individually:
+   npm run seed:ginza
+   npm run seed:osaka
+   ```
+
+**Result**: 25-30 real venues with ratings, addresses, and map links!
+
+**See**: [QUICKSTART_SEEDING.md](QUICKSTART_SEEDING.md) for detailed instructions.
 
 ## Project Structure
 
@@ -195,6 +228,36 @@ Get weather information and generated maps.
   "mapUrl": "..."
 }
 ```
+
+### POST /api/seed
+Auto-seed database with real venues from Google Places API.
+
+**Request**:
+```json
+{
+  "areas": ["ginza", "osaka"]  // or ["ginza"] or ["osaka"]
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Seeded 27 venues in 18.34s",
+  "results": {
+    "ginza": 15,
+    "osaka": 12,
+    "total": 27
+  },
+  "stats": {
+    "total": 33,
+    "byCategory": [...],
+    "byDistrict": [...]
+  }
+}
+```
+
+**Note**: Requires `GOOGLE_PLACES_API_KEY` secret to be set.
 
 ## Database Schema
 
