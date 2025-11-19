@@ -79,10 +79,10 @@ export const AI_MODELS: Record<string, ModelConfig> = {
 
   // Google Gemini
   'gemini-pro': {
-    id: 'gemini-2.0-flash-exp',
-    name: 'Gemini 2.0 Flash',
+    id: 'gemini-2.5-pro-latest',
+    name: 'Gemini 2.5 Pro',
     provider: 'gemini',
-    description: 'Latest Gemini model with multimodal capabilities and native tool use',
+    description: 'Most advanced Gemini model with superior reasoning and multimodal capabilities',
     capabilities: {
       chat: true,
       streaming: true,
@@ -92,10 +92,10 @@ export const AI_MODELS: Record<string, ModelConfig> = {
     maxTokens: 8192,
   },
   'gemini-flash': {
-    id: 'gemini-2.0-flash-thinking-exp',
-    name: 'Gemini 2.0 Flash Thinking',
+    id: 'gemini-2.5-flash-latest',
+    name: 'Gemini 2.5 Flash',
     provider: 'gemini',
-    description: 'Gemini 2.0 with extended thinking for complex reasoning tasks',
+    description: 'Fast and efficient Gemini 2.5 model optimized for speed',
     capabilities: {
       chat: true,
       streaming: true,
