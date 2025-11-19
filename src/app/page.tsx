@@ -114,25 +114,52 @@ export default function Home() {
       <header className="header">
         <h1>Tokyo 2025 Travel Companion</h1>
         <p>Discover the best of Tokyo with AI-powered recommendations</p>
-        <Link
-          href="/seed"
-          style={{
-            display: 'inline-block',
-            marginTop: '1rem',
-            padding: '0.5rem 1.5rem',
-            background: 'var(--accent)',
-            color: 'white',
-            textDecoration: 'none',
-            borderRadius: '8px',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            transition: 'transform 0.2s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-        >
-          🌱 Seed Database with Ginza & Osaka Venues
-        </Link>
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Link
+            href="/chat"
+            style={{
+              display: 'inline-block',
+              padding: '0.75rem 1.5rem',
+              background: 'linear-gradient(135deg, var(--accent), var(--accent-hover))',
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: '700',
+              boxShadow: '0 4px 12px rgba(255, 64, 129, 0.3)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            🤖 Advanced AI Chat (Multi-Model)
+          </Link>
+          <Link
+            href="/seed"
+            style={{
+              display: 'inline-block',
+              padding: '0.75rem 1.5rem',
+              background: 'var(--bg-tertiary)',
+              color: 'white',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              border: '1px solid var(--border)',
+              transition: 'transform 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.background = 'var(--accent)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.background = 'var(--bg-tertiary)';
+            }}
+          >
+            🌱 Manage Venues
+          </Link>
+        </div>
       </header>
 
       <div className="chat-container">
