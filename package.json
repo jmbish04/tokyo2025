@@ -30,9 +30,13 @@
     "@cloudflare/workers-types": "^4.20240512.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
-    "ai": "^3.1.0",
-    "@ai-sdk/openai": "^0.0.24",
-    "@ai-sdk/react": "^0.0.24"
+    "ai": "^3.1.30",
+    "@ai-sdk/openai": "^0.0.42",
+    "@ai-sdk/google": "^0.0.31",
+    "@ai-sdk/react": "^0.0.35",
+    "nanoid": "^5.0.4",
+    "date-fns": "^3.0.6",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.12.0",
