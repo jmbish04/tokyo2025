@@ -1,0 +1,22 @@
+name = "tokyo2025"
+main = "src/worker.ts"
+compatibility_date = "2024-06-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tokyo2025-db"
+database_id = "placeholder"
+
+[[kv_namespaces]]
+binding = "MEMORY"
+id = "placeholder"
+
+[ai]
+binding = "AI"
+
+[[analytics_engine_datasets]]
+binding = "ANALYTICS"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"

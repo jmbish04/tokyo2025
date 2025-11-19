@@ -1,0 +1,291 @@
+/* Tokyo 2025 Travel Companion - Additional Styles */
+
+:root {
+  --tokyo-red: #ff4081;
+  --tokyo-pink: #ff6b9d;
+  --tokyo-purple: #9c27b0;
+  --tokyo-blue: #2196f3;
+  --tokyo-green: #4caf50;
+  --dark-bg: #0f0f0f;
+  --dark-card: #1a1a1a;
+  --dark-border: #333333;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #252525 50%, #1a1a1a 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 4px;
+}
+
+/* Tokyo-themed gradients */
+.tokyo-gradient {
+  background: linear-gradient(135deg, var(--tokyo-red), var(--tokyo-pink));
+}
+
+.tokyo-gradient-text {
+  background: linear-gradient(135deg, var(--tokyo-red), var(--tokyo-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Weather widget */
+.weather-widget {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.weather-icon {
+  font-size: 3rem;
+}
+
+.weather-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--tokyo-blue);
+}
+
+.weather-temp {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Map container */
+.map-container {
+  width: 100%;
+  height: 400px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1rem 0;
+  border: 1px solid var(--dark-border);
+}
+
+.map-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Category badges */
+.category-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0.25rem;
+}
+
+.badge-food {
+  background: var(--tokyo-red);
+  color: white;
+}
+
+.badge-shopping {
+  background: var(--tokyo-purple);
+  color: white;
+}
+
+.badge-nightlife {
+  background: var(--tokyo-blue);
+  color: white;
+}
+
+.badge-culture {
+  background: var(--tokyo-green);
+  color: white;
+}
+
+/* Image gallery */
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.gallery-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.gallery-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+  margin: 2rem 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--tokyo-gradient);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 2rem;
+  padding-left: 2rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--tokyo-red);
+  border: 2px solid var(--dark-bg);
+}
+
+.timeline-time {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-content {
+  background: var(--dark-card);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--dark-border);
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .chat-container {
+    max-height: 400px;
+  }
+
+  .message {
+    max-width: 90%;
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .weather-widget {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* Print styles */
+@media print {
+  .input-container,
+  .file-upload {
+    display: none;
+  }
+
+  .chat-container {
+    max-height: none;
+    overflow: visible;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+/* Accessibility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus styles for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--tokyo-red);
+  outline-offset: 2px;
+}
+
+/* Dark mode support (already default, but keeping for reference) */
+@media (prefers-color-scheme: dark) {
+  /* Already using dark theme as default */
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

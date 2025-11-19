@@ -1,0 +1,39 @@
+{
+  "name": "tokyo2025",
+  "version": "1.0.0",
+  "description": "AI-powered Tokyo 2025 Travel Companion on Cloudflare Workers",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create tokyo2025-db",
+    "db:migrate": "wrangler d1 migrations apply tokyo2025-db",
+    "db:migrate:local": "wrangler d1 migrations apply tokyo2025-db --local",
+    "kv:create": "wrangler kv:namespace create MEMORY",
+    "cf:login": "wrangler login",
+    "cf:init": "npm run db:create && npm run kv:create"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "@cloudflare/next-on-pages": "^1.13.0",
+    "@cloudflare/workers-types": "^4.20240512.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "ai": "^3.1.0",
+    "@ai-sdk/openai": "^0.0.24",
+    "@ai-sdk/react": "^0.0.24"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.4.0",
+    "wrangler": "^3.57.0",
+    "vercel": "^34.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
