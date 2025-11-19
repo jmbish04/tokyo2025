@@ -116,6 +116,15 @@ Populate your database with real Ginza and Osaka venues from Google Places API.
    ```
 
 3. **Seed Database**:
+
+   **Option A: Web Interface (Easiest!)**
+   ```bash
+   npx wrangler dev
+   # Visit http://localhost:8787/seed in your browser
+   # Click "Start Seeding" - done!
+   ```
+
+   **Option B: Command Line**
    ```bash
    # Seed both Ginza and Osaka
    npm run seed:all

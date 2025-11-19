@@ -2,7 +2,24 @@
 
 One-page reference for seeding your Tokyo 2025 database with Ginza & Osaka venues.
 
-## 🚀 Quick Start (3 Commands)
+## 🚀 Quick Start
+
+### Web Interface (Easiest!)
+
+```bash
+# 1. Set your API key
+npx wrangler secret put GOOGLE_PLACES_API_KEY
+
+# 2. Start worker
+npx wrangler dev
+
+# 3. Visit in browser
+http://localhost:8787/seed
+
+# 4. Click "Start Seeding" - Done!
+```
+
+### Command Line (3 Commands)
 
 ```bash
 # 1. Set your API key
@@ -14,6 +31,19 @@ npx wrangler dev
 # 3. Seed database
 npm run seed:all
 ```
+
+## 🌐 Web Interface
+
+The easiest way to seed is through the web UI:
+
+1. **Start worker**: `npx wrangler dev`
+2. **Open browser**: http://localhost:8787/seed
+3. **Features**:
+   - Select Ginza and/or Osaka
+   - Enter API key (or use secret)
+   - Watch real-time progress
+   - See results and statistics
+   - Beautiful responsive UI
 
 ## 📋 All Commands
 

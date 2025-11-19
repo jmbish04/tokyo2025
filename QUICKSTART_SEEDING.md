@@ -76,7 +76,30 @@ npx wrangler deploy
 
 ## Step 4: Seed the Database (2 minutes)
 
-### Method A: Using npm Scripts (Easiest)
+### Method A: Web Interface (Easiest!)
+
+```bash
+# Start your worker
+npx wrangler dev
+
+# Open in browser
+# Visit: http://localhost:8787/seed
+
+# On the page:
+# 1. Select Ginza and/or Osaka
+# 2. Enter your API key (if not set as secret)
+# 3. Click "Start Seeding"
+# 4. Watch the progress!
+```
+
+The web interface shows:
+- Real-time status
+- Venue count
+- Seeding progress
+- Results with statistics
+- Beautiful UI with area selection
+
+### Method B: Using npm Scripts (Command Line)
 
 ```bash
 # Open a new terminal
@@ -89,7 +112,7 @@ npm run seed:ginza    # Just Ginza
 npm run seed:osaka    # Just Osaka
 ```
 
-### Method B: Using curl (Alternative)
+### Method C: Using curl (Alternative)
 
 ```bash
 # For local worker
@@ -103,12 +126,11 @@ curl -X POST https://tokyo2025.YOUR-WORKER.workers.dev/api/seed \
   -d '{"areas": ["ginza", "osaka"]}'
 ```
 
-### Method C: Using Web Browser (Simplest for non-technical users)
+### Method D: Direct API (Advanced)
 
-1. Go to your worker URL: `https://tokyo2025.YOUR-WORKER.workers.dev/api/seed`
-2. You'll see seeding instructions
-3. Use a tool like [Postman](https://postman.com) or [Hoppscotch](https://hoppscotch.io)
-4. Make a POST request with body: `{"areas": ["ginza", "osaka"]}`
+Use a tool like [Postman](https://postman.com) or [Hoppscotch](https://hoppscotch.io):
+1. Make a POST request to `/api/seed`
+2. Body: `{"areas": ["ginza", "osaka"]}`
 
 ## Expected Output
 

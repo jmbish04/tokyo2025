@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -113,6 +114,25 @@ export default function Home() {
       <header className="header">
         <h1>Tokyo 2025 Travel Companion</h1>
         <p>Discover the best of Tokyo with AI-powered recommendations</p>
+        <Link
+          href="/seed"
+          style={{
+            display: 'inline-block',
+            marginTop: '1rem',
+            padding: '0.5rem 1.5rem',
+            background: 'var(--accent)',
+            color: 'white',
+            textDecoration: 'none',
+            borderRadius: '8px',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            transition: 'transform 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          🌱 Seed Database with Ginza & Osaka Venues
+        </Link>
       </header>
 
       <div className="chat-container">
