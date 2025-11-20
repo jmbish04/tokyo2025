@@ -56,8 +56,8 @@ CREATE TABLE chats (
   user_id TEXT DEFAULT 'anonymous',
   title TEXT NOT NULL,
   model TEXT DEFAULT 'workers-ai-reasoning',
-  created_at DATETIME,
-  updated_at DATETIME
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Messages table
@@ -67,7 +67,7 @@ CREATE TABLE messages (
   role TEXT NOT NULL CHECK(role IN ('user', 'assistant', 'system')),
   content TEXT NOT NULL,
   model TEXT,
-  created_at DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
 );
 ```

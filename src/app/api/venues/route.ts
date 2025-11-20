@@ -4,6 +4,36 @@ export const runtime = 'edge';
 
 interface Env {
   DB: D1Database;
+  ADMIN_API_KEY?: { get: () => Promise<string> };
+}
+
+/**
+ * Simple admin authentication check
+ * Returns true if authenticated, false otherwise
+ */
+async function isAuthenticated(request: NextRequest, env: Env): Promise<boolean> {
+  const authHeader = request.headers.get('authorization');
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+
+  const providedKey = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+  // Check against ADMIN_API_KEY if configured
+  if (env.ADMIN_API_KEY) {
+    try {
+      const adminKey = await env.ADMIN_API_KEY.get();
+      return providedKey === adminKey;
+    } catch (err) {
+      console.error('[AUTH] Failed to get ADMIN_API_KEY:', err);
+      return false;
+    }
+  }
+
+  // If no ADMIN_API_KEY configured, deny access (secure by default)
+  console.warn('[AUTH] ADMIN_API_KEY not configured - denying access');
+  return false;
 }
 
 /**
@@ -17,7 +47,7 @@ export async function GET(request: NextRequest) {
     const district = searchParams.get('district');
     const category = searchParams.get('category');
 
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
 
     if (!env.DB) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
@@ -72,7 +102,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
 
     if (!env.DB) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
@@ -121,20 +151,30 @@ export async function POST(request: NextRequest) {
 
 /**
  * DELETE /api/venues?id=123 - Delete a venue
+ * Requires admin authentication via Authorization: Bearer <ADMIN_API_KEY> header
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const env = (globalThis as any).env as Env;
+
+    if (!env.DB) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
+    }
+
+    // Authenticate admin user
+    const authenticated = await isAuthenticated(request, env);
+    if (!authenticated) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Admin authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
       return NextResponse.json({ error: 'Venue ID required' }, { status: 400 });
-    }
-
-    const env = process.env as unknown as Env;
-
-    if (!env.DB) {
-      return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
     }
 
     await env.DB.prepare('DELETE FROM venues WHERE id = ?').bind(id).run();

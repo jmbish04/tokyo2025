@@ -188,26 +188,35 @@ const tools = {
   }),
 
   examineTable: tool({
-    description: 'Examine D1 database tables - get schema, row counts, sample data, or run custom SQL queries for analysis',
+    description: 'Examine D1 database tables - get schema, row counts, and sample data. For security reasons, only predefined operations are allowed.',
     parameters: z.object({
-      operation: z.enum(['list_tables', 'table_info', 'row_count', 'sample_data', 'custom_query']).describe('Operation to perform'),
+      operation: z.enum(['list_tables', 'table_info', 'row_count', 'sample_data']).describe('Operation to perform'),
       tableName: z.string().optional().describe('Table name (required for table_info, row_count, sample_data)'),
-      customQuery: z.string().optional().describe('Custom SQL query (SELECT only, for custom_query operation)'),
       limit: z.number().optional().default(5).describe('Number of sample rows to return'),
     }),
-    execute: async ({ operation, tableName, customQuery, limit }, { DB }: { DB: D1Database }) => {
+    execute: async ({ operation, tableName, limit }, { DB }: { DB: D1Database }) => {
       const maxLimit = Math.min(limit || 5, 20);
+
+      // Whitelist of allowed table names to prevent SQL injection
+      const allowedTables = [
+        'venues', 'chats', 'messages', 'app_logs', 'api_logs',
+        'error_logs', 'ai_logs', 'performance_metrics'
+      ];
+
+      // Validate table name if provided
+      if (tableName && !allowedTables.includes(tableName)) {
+        throw new Error(`Table '${tableName}' is not accessible. Allowed tables: ${allowedTables.join(', ')}`);
+      }
 
       switch (operation) {
         case 'list_tables': {
-          const { results } = await (DB as D1Database)
-            .prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
-            .all();
-          return results;
+          // Only return allowed tables
+          return allowedTables.map(name => ({ name }));
         }
 
         case 'table_info': {
           if (!tableName) throw new Error('tableName required for table_info');
+          // tableName is validated against whitelist above, safe to use
           const { results } = await (DB as D1Database)
             .prepare(`PRAGMA table_info(${tableName})`)
             .all();
@@ -216,6 +225,7 @@ const tools = {
 
         case 'row_count': {
           if (!tableName) throw new Error('tableName required for row_count');
+          // tableName is validated against whitelist above, safe to use
           const { results } = await (DB as D1Database)
             .prepare(`SELECT COUNT(*) as count FROM ${tableName}`)
             .all();
@@ -224,21 +234,10 @@ const tools = {
 
         case 'sample_data': {
           if (!tableName) throw new Error('tableName required for sample_data');
+          // tableName is validated against whitelist above, safe to use
           const { results } = await (DB as D1Database)
             .prepare(`SELECT * FROM ${tableName} LIMIT ?`)
             .bind(maxLimit)
-            .all();
-          return results;
-        }
-
-        case 'custom_query': {
-          if (!customQuery) throw new Error('customQuery required for custom_query');
-          // Security: Only allow SELECT queries
-          if (!customQuery.trim().toLowerCase().startsWith('select')) {
-            throw new Error('Only SELECT queries are allowed');
-          }
-          const { results } = await (DB as D1Database)
-            .prepare(customQuery)
             .all();
           return results;
         }

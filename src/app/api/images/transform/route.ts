@@ -5,6 +5,36 @@ export const runtime = 'edge';
 interface Env {
   CLOUDFLARE_ACCOUNT_ID: { get: () => Promise<string> };
   CLOUDFLARE_API_TOKEN: { get: () => Promise<string> };
+  ADMIN_API_KEY?: { get: () => Promise<string> };
+}
+
+/**
+ * Simple admin authentication check
+ * Returns true if authenticated, false otherwise
+ */
+async function isAuthenticated(request: NextRequest, env: Env): Promise<boolean> {
+  const authHeader = request.headers.get('authorization');
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+
+  const providedKey = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+  // Check against ADMIN_API_KEY if configured
+  if (env.ADMIN_API_KEY) {
+    try {
+      const adminKey = await env.ADMIN_API_KEY.get();
+      return providedKey === adminKey;
+    } catch (err) {
+      console.error('[AUTH] Failed to get ADMIN_API_KEY:', err);
+      return false;
+    }
+  }
+
+  // If no ADMIN_API_KEY configured, deny access (secure by default)
+  console.warn('[AUTH] ADMIN_API_KEY not configured - denying access');
+  return false;
 }
 
 interface TransformOptions {
@@ -38,10 +68,21 @@ async function getSecretsWithLogging(env: Env) {
 
 /**
  * POST /api/images/transform - Create transformed variant of image
+ * Requires admin authentication via Authorization: Bearer <ADMIN_API_KEY> header
  */
 export async function POST(request: NextRequest) {
   try {
     const env = (globalThis as any).env as Env;
+
+    // Authenticate admin user
+    const authenticated = await isAuthenticated(request, env);
+    if (!authenticated) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Admin authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { imageId, variantName, options } = body as {
       imageId: string;

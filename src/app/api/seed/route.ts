@@ -6,10 +6,41 @@ export const runtime = 'edge';
 interface Env {
   DB: D1Database;
   GOOGLE_PLACES_API_KEY?: string;
+  ADMIN_API_KEY?: { get: () => Promise<string> };
+}
+
+/**
+ * Simple admin authentication check
+ * Returns true if authenticated, false otherwise
+ */
+async function isAuthenticated(request: NextRequest, env: Env): Promise<boolean> {
+  const authHeader = request.headers.get('authorization');
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+
+  const providedKey = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+  // Check against ADMIN_API_KEY if configured
+  if (env.ADMIN_API_KEY) {
+    try {
+      const adminKey = await env.ADMIN_API_KEY.get();
+      return providedKey === adminKey;
+    } catch (err) {
+      console.error('[AUTH] Failed to get ADMIN_API_KEY:', err);
+      return false;
+    }
+  }
+
+  // If no ADMIN_API_KEY configured, deny access (secure by default)
+  console.warn('[AUTH] ADMIN_API_KEY not configured - denying access');
+  return false;
 }
 
 /**
  * Admin endpoint to seed the database with real venue data
+ * Requires admin authentication via Authorization: Bearer <ADMIN_API_KEY> header
  * POST /api/seed
  *
  * Body:
@@ -20,10 +51,19 @@ interface Env {
  */
 export async function POST(request: NextRequest) {
   try {
+    const env = (globalThis as any).env as Env;
+
+    // Authenticate admin user
+    const authenticated = await isAuthenticated(request, env);
+    if (!authenticated) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Admin authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const { areas, apiKey: bodyApiKey } = body;
-
-    const env = process.env as unknown as Env;
 
     // Get API key from body, environment variable, or fail
     const apiKey = bodyApiKey || env.GOOGLE_PLACES_API_KEY;
@@ -86,7 +126,7 @@ export async function POST(request: NextRequest) {
  * GET /api/seed - Show seeding status and instructions
  */
 export async function GET(request: NextRequest) {
-  const env = process.env as unknown as Env;
+  const env = (globalThis as any).env as Env;
 
   const hasApiKey = !!env.GOOGLE_PLACES_API_KEY;
   const hasDb = !!env.DB;

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
 
     if (!env.DB) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
@@ -86,7 +86,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Chat ID is required' }, { status: 400 });
     }
 
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
 
     if (!env.DB) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
@@ -116,7 +116,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Chat ID is required' }, { status: 400 });
     }
 
-    const env = process.env as unknown as Env;
+    const env = (globalThis as any).env as Env;
 
     if (!env.DB) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });

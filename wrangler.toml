@@ -13,7 +13,8 @@ secrets_store_secrets = [
   { binding = "OPENAI_API_KEY", store_id = "STORE_ID_HERE", secret_name = "OPENAI_API_KEY" },
   { binding = "GOOGLE_API_KEY", store_id = "STORE_ID_HERE", secret_name = "GOOGLE_API_KEY" },
   { binding = "CLOUDFLARE_ACCOUNT_ID", store_id = "STORE_ID_HERE", secret_name = "CLOUDFLARE_ACCOUNT_ID" },
-  { binding = "CLOUDFLARE_API_TOKEN", store_id = "STORE_ID_HERE", secret_name = "CLOUDFLARE_API_TOKEN" }
+  { binding = "CLOUDFLARE_API_TOKEN", store_id = "STORE_ID_HERE", secret_name = "CLOUDFLARE_API_TOKEN" },
+  { binding = "ADMIN_API_KEY", store_id = "STORE_ID_HERE", secret_name = "ADMIN_API_KEY" }
 ]
 
 # D1 Database
