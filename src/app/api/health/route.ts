@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     // In development, bindings might not be available
     return new Response(
       JSON.stringify({
-        status: 'healthy',
+        status: 'degraded',
         timestamp: new Date().toISOString(),
         note: 'Development mode - bindings not available',
         services: {
