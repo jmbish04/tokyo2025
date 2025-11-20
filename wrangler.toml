@@ -1,5 +1,5 @@
 name = "tokyo2025"
-main = "src/worker.ts"
+main = ".vercel/output/_worker.js"
 compatibility_date = "2024-06-01"
 
 # Observability (with enhanced sampling for debugging secrets)
@@ -35,8 +35,3 @@ binding = "AI"
 # Analytics
 [[analytics_engine_datasets]]
 binding = "ANALYTICS"
-
-# Static Assets - Next.js build output
-[assets]
-directory = "./.vercel/output/static"
-binding = "ASSETS"

@@ -10,9 +10,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    runtime: 'edge',
-  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {

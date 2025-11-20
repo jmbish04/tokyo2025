@@ -4,10 +4,11 @@
   "description": "AI-powered Tokyo 2025 Travel Companion on Cloudflare Workers",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "wrangler dev",
     "build": "next build && npx @cloudflare/next-on-pages",
     "start": "next start",
-    "deploy": "npm run build && npm run db:migrate && wrangler deploy",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "npm run build && wrangler dev",
     "db:create": "wrangler d1 create tokyo2025-db",
     "db:migrate": "wrangler d1 migrations apply DB --remote",
     "db:migrate:local": "wrangler d1 migrations apply tokyo2025-db --local",
@@ -25,7 +26,7 @@
     "seed:all": "node src/scripts/seed-cli.js all"
   },
   "dependencies": {
-    "next": "^14.2.0",
+    "next": "^14.3.0",
     "@cloudflare/next-on-pages": "^1.13.0",
     "@cloudflare/workers-types": "^4.20240512.0",
     "react": "^18.3.0",
