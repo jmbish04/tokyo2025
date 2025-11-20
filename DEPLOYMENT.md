@@ -2,6 +2,8 @@
 
 Complete guide for deploying the Tokyo 2025 Travel Companion to Cloudflare Workers.
 
+> **⚠️ Important**: If you're using Cloudflare Pages automatic deployments, see [CLOUDFLARE_PAGES_CONFIG.md](./CLOUDFLARE_PAGES_CONFIG.md) for the correct build settings.
+
 ## Prerequisites
 
 1. **Cloudflare Account**
