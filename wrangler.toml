@@ -36,7 +36,7 @@ binding = "AI"
 [[analytics_engine_datasets]]
 binding = "ANALYTICS"
 
-# Static Assets
+# Static Assets - Next.js build output
 [assets]
-directory = "./public"
+directory = "./.vercel/output/static"
 binding = "ASSETS"

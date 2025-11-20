@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && npx @cloudflare/next-on-pages",
     "start": "next start",
-    "deploy": "npm run db:migrate && wrangler deploy",
+    "deploy": "npm run build && npm run db:migrate && wrangler deploy",
     "db:create": "wrangler d1 create tokyo2025-db",
     "db:migrate": "wrangler d1 migrations apply DB --remote",
     "db:migrate:local": "wrangler d1 migrations apply tokyo2025-db --local",
