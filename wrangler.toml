@@ -10,11 +10,11 @@ head_sampling_rate = 1.0  # 100% sampling for debugging, reduce to 0.1-0.01 in p
 # Secrets Store - TODO: Replace STORE_ID_HERE with actual store ID
 # Get your store ID by running: npx wrangler secrets-store store list --remote
 secrets_store_secrets = [
-  { binding = "OPENAI_API_KEY", store_id = "STORE_ID_HERE", secret_name = "OPENAI_API_KEY" },
-  { binding = "GOOGLE_API_KEY", store_id = "STORE_ID_HERE", secret_name = "GOOGLE_API_KEY" },
-  { binding = "CLOUDFLARE_ACCOUNT_ID", store_id = "STORE_ID_HERE", secret_name = "CLOUDFLARE_ACCOUNT_ID" },
-  { binding = "CLOUDFLARE_API_TOKEN", store_id = "STORE_ID_HERE", secret_name = "CLOUDFLARE_API_TOKEN" },
-  { binding = "ADMIN_API_KEY", store_id = "STORE_ID_HERE", secret_name = "ADMIN_API_KEY" }
+  { binding = "OPENAI_API_KEY", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "OPENAI_API_KEY" },
+  { binding = "GOOGLE_API_KEY", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "GOOGLE_API_KEY" },
+  { binding = "CLOUDFLARE_ACCOUNT_ID", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "CLOUDFLARE_ACCOUNT_ID" },
+  { binding = "CLOUDFLARE_API_TOKEN", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "CLOUDFLARE_API_TOKEN" },
+  { binding = "ADMIN_API_KEY", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "WORKER_API_KEY" }
 ]
 
 # D1 Database
