@@ -1,6 +1,7 @@
 /**
  * Next.js Middleware
- * Sets up Cloudflare bindings to be accessible globally
+ * Note: Cloudflare bindings are accessed per-request via getRequestContext()
+ * from '@cloudflare/next-on-pages' in each API route, not via middleware
  */
 
 import { NextResponse } from 'next/server';
@@ -19,18 +20,10 @@ export const config = {
 };
 
 export function middleware(request: NextRequest) {
-  // Try to get Cloudflare bindings from the request context
-  // When running on Cloudflare Workers, bindings are available via getRequestContext
-  try {
-    // @ts-ignore - getRequestContext is provided by @cloudflare/next-on-pages at runtime
-    if (typeof getRequestContext === 'function') {
-      // @ts-ignore
-      const { env } = getRequestContext();
-      (globalThis as any).env = env;
-    }
-  } catch (e) {
-    // In development or if getRequestContext is not available, bindings may already be set
-  }
+  // Middleware for future use (e.g., auth, logging, etc.)
+  // Cloudflare bindings should be accessed in API routes via:
+  // import { getRequestContext } from '@cloudflare/next-on-pages';
+  // const { env } = getRequestContext();
 
   return NextResponse.next();
 }
