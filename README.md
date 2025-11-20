@@ -2,23 +2,90 @@
 
 AI-powered travel assistant for exploring Tokyo, built on Cloudflare Workers with Next.js 14.
 
-## Features
+## ✨ Features
 
-- **AI Chat Assistant**: Powered by Cloudflare Workers AI (Llama 3 8B)
-- **Venue Database**: Curated collection of Tokyo's best spots (D1 Database)
-- **Image Upload**: Store and analyze travel photos (Cloudflare Images)
-- **Chat Memory**: Short-term (KV) and long-term (D1) conversation storage
-- **Weather Maps**: AI-generated weather visualizations
-- **Generative UI**: Dynamic venue cards, timelines, and maps
+### 🤖 Multi-Model AI Chat
+- **6 AI Models**: Choose from Workers AI, OpenAI (GPT-4, GPT-3.5), or Google Gemini (1.5 Pro, 1.5 Flash)
+- **Streaming Responses**: Real-time AI responses with Vercel AI SDK
+- **Chat History**: Persistent conversations stored in D1 with full history
+- **Tool Calling**: AI can invoke weather, subway, and venue search tools
+- **Model Switching**: Change AI models mid-conversation
 
-## Tech Stack
+### 📸 Image Analysis
+- **Upload Photos**: Cloudflare Images integration with automatic optimization
+- **AI Vision**: Analyze images with GPT-4 Vision or Gemini 1.5 Pro
+- **Auto-Identification**: Identify restaurants, landmarks, and venues from photos
+- **Image Transformations**: Resize, crop, blur, and apply filters on-the-fly
+- **Chat Integration**: Upload and analyze images directly in conversations
+
+### 🎨 Generative UI Components
+- **Weather Cards**: Real-time weather data with visual displays
+- **Subway Maps**: Interactive Tokyo Metro route visualization
+- **Attraction Cards**: Rich venue cards with ratings, hours, and photos
+- **Dynamic Rendering**: AI-generated UI components based on context
+
+### 🗺️ Venue Management
+- **Auto-Seeding**: Populate database from Google Places API
+- **Manual Entry**: Add venues through web interface
+- **Smart Search**: AI-powered venue search and recommendations
+- **Database Preview**: View and manage venue collection
+- **Ginza & Osaka Focus**: Pre-configured categories and districts
+
+### 💬 Advanced Chat Features
+- **Conversation Management**: Create, list, and delete chat sessions
+- **Message Count**: Track conversation length and activity
+- **Sidebar History**: Quick access to recent conversations
+- **Auto-Save**: Messages automatically persisted to database
+- **Export Ready**: Structured data for conversation export
+
+## 🛠️ Tech Stack
 
 - **Framework**: Next.js 14 with App Router
 - **Runtime**: Cloudflare Workers (Edge)
 - **Database**: Cloudflare D1 (SQLite)
-- **Storage**: Cloudflare KV
-- **AI**: Cloudflare Workers AI
-- **Deployment**: Cloudflare Workers
+- **Storage**: Cloudflare KV, Cloudflare Images
+- **AI SDKs**: Vercel AI SDK, OpenAI SDK, Google AI SDK
+- **AI Models**:
+  - Workers AI (@cf/openai/gpt-4o-mini, @cf/meta/llama-3.1-8b-instruct)
+  - OpenAI (gpt-4-turbo, gpt-3.5-turbo)
+  - Google Gemini (gemini-1.5-pro, gemini-1.5-flash)
+- **UI**: React Server Components, Streaming
+- **Styling**: CSS-in-JS with CSS variables
+- **Deployment**: Cloudflare Workers with CI/CD
+
+## 🌐 Pages & Routes
+
+### User-Facing Pages
+- `/` - Home page with feature overview and navigation
+- `/chat` - Advanced AI chat interface with multi-model support
+- `/seed` - Venue management (auto-seed and manual entry)
+
+### API Routes
+
+#### Chat & AI
+- `POST /api/ai-chat` - Streaming chat with tool calling
+- `GET /api/ai-chat?chatId={id}` - Get chat messages
+- `GET /api/chats` - List all conversations
+- `POST /api/chats` - Create new conversation
+- `PATCH /api/chats` - Update conversation
+- `DELETE /api/chats?chatId={id}` - Delete conversation
+
+#### Images
+- `POST /api/images/upload` - Upload to Cloudflare Images
+- `POST /api/images/analyze` - AI vision analysis (GPT-4/Gemini)
+- `GET /api/images/transform` - Get transformed image URL
+- `GET /api/images/upload?imageId={id}` - Get image details
+- `DELETE /api/images/upload?imageId={id}` - Delete image
+
+#### Venues
+- `GET /api/venues` - Search and list venues
+- `POST /api/venues` - Add manual venue
+- `DELETE /api/venues?id={id}` - Delete venue
+
+#### Utilities
+- `POST /api/seed` - Auto-seed from Google Places
+- `POST /api/chat` - Legacy simple chat endpoint
+- `POST /api/upload` - Legacy file upload
 
 ## Prerequisites
 
@@ -26,6 +93,54 @@ AI-powered travel assistant for exploring Tokyo, built on Cloudflare Workers wit
 - npm or yarn
 - Cloudflare account
 - Wrangler CLI
+
+## 🔑 API Keys & Configuration
+
+### Required for Production
+- **Cloudflare Account** - For Workers, D1, KV, and Images
+
+### Optional (Enable specific features)
+- **OpenAI API Key** - For GPT-4 and GPT-3.5 Turbo models ([Get key](https://platform.openai.com))
+- **Google API Key** - For Gemini 1.5 Pro/Flash models ([Get key](https://aistudio.google.com/app/apikey))
+- **Cloudflare Images** - Account ID and API Token ([Dashboard](https://dash.cloudflare.com))
+- **Google Places API** - For auto-seeding venues ([Console](https://console.cloud.google.com))
+
+### Local Development
+
+Copy `.dev.vars.example` to `.dev.vars`:
+
+```bash
+cp .dev.vars.example .dev.vars
+```
+
+Edit `.dev.vars` and add your API keys:
+
+```bash
+# AI Provider Keys (optional - enables specific models)
+OPENAI_API_KEY=sk-...
+GOOGLE_API_KEY=AIza...
+
+# Cloudflare Images (optional - enables image upload/analysis)
+CLOUDFLARE_ACCOUNT_ID=your_account_id
+CLOUDFLARE_API_TOKEN=your_api_token
+
+# Google Places (optional - enables auto-seeding)
+GOOGLE_PLACES_API_KEY=AIza...
+```
+
+### Production Secrets
+
+Set production secrets using Wrangler:
+
+```bash
+npx wrangler secret put OPENAI_API_KEY
+npx wrangler secret put GOOGLE_API_KEY
+npx wrangler secret put CLOUDFLARE_ACCOUNT_ID
+npx wrangler secret put CLOUDFLARE_API_TOKEN
+npx wrangler secret put GOOGLE_PLACES_API_KEY
+```
+
+**Note:** Workers AI is always available (no API key needed) and is the default model.
 
 ## Quick Start
 
@@ -96,34 +211,118 @@ npm run build
 npm run deploy
 ```
 
-## Project Structure
+### 7. Auto-Seed Venues (Optional but Recommended!)
+
+Populate your database with real Ginza and Osaka venues from Google Places API.
+
+#### Quick Setup (5 minutes)
+
+1. **Get Google Places API Key**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com)
+   - Create project → Enable "Places API"
+   - Create API Key
+
+2. **Set Secret**:
+   ```bash
+   npx wrangler secret put GOOGLE_PLACES_API_KEY
+   # Paste your key when prompted
+   ```
+
+3. **Seed Database**:
+
+   **Option A: Web Interface (Easiest!)**
+   ```bash
+   npx wrangler dev
+   # Visit http://localhost:8787/seed in your browser
+   # Click "Start Seeding" - done!
+   ```
+
+   **Option B: Command Line**
+   ```bash
+   # Seed both Ginza and Osaka
+   npm run seed:all
+
+   # Or individually:
+   npm run seed:ginza
+   npm run seed:osaka
+   ```
+
+**Result**: 25-30 real venues with ratings, addresses, and map links!
+
+**See**: [QUICKSTART_SEEDING.md](QUICKSTART_SEEDING.md) for detailed instructions.
+
+## 📁 Project Structure
 
 ```
 tokyo2025/
 ├── public/              # Static assets
-│   ├── styles.css
-│   └── icons/
+│   └── styles.css
 ├── src/
 │   ├── app/             # Next.js App Router
 │   │   ├── layout.tsx
-│   │   ├── page.tsx
+│   │   ├── page.tsx     # Home page
 │   │   ├── globals.css
+│   │   ├── chat/        # Advanced AI chat interface
+│   │   │   └── page.tsx
+│   │   ├── seed/        # Venue management
+│   │   │   └── page.tsx
 │   │   └── api/         # API routes
-│   │       ├── chat/
-│   │       ├── upload/
-│   │       ├── memory/
-│   │       └── weather/
+│   │       ├── ai-chat/      # Streaming chat with tools
+│   │       ├── chats/        # Conversation management
+│   │       ├── images/       # Image upload & analysis
+│   │       │   ├── upload/
+│   │       │   ├── analyze/
+│   │       │   └── transform/
+│   │       ├── venues/       # Venue CRUD
+│   │       ├── seed/         # Auto-seeding
+│   │       ├── chat/         # Legacy chat
+│   │       └── upload/       # Legacy upload
+│   ├── components/      # React components
+│   │   ├── generative/  # Generative UI components
+│   │   │   ├── weather-card.tsx
+│   │   │   ├── subway-map.tsx
+│   │   │   └── attraction-card.tsx
+│   │   └── image-upload.tsx
+│   ├── lib/             # Utilities and configs
+│   │   ├── ai-config.ts      # Multi-model configuration
+│   │   ├── ai-provider.ts    # AI model factory
+│   │   └── chat-history.ts   # Chat persistence layer
 │   └── worker.ts        # Cloudflare Worker entry point
 ├── migrations/          # D1 database migrations
-│   ├── 001_init.sql
-│   └── 002_seed.sql
-├── schema.sql           # Database schema
-├── agents.md            # Agent architecture docs
+│   ├── 001_init.sql     # Venues and logs tables
+│   ├── 002_seed.sql     # Initial venue data
+│   └── 003_chat_history.sql  # Chat and messages tables
+├── docs/                # Documentation
+│   ├── CLOUDFLARE_IMAGES.md  # Image features guide
+│   └── DEPLOYMENT_GUIDE.md   # Production deployment
 ├── wrangler.toml        # Cloudflare configuration
 ├── package.json
 ├── tsconfig.json
 └── next.config.js
 ```
+
+## 📚 Documentation
+
+Comprehensive guides for all features:
+
+- **[DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)** - Complete production deployment guide
+  - Environment setup and secrets
+  - Database migrations
+  - Custom domains
+  - Monitoring and optimization
+  - Troubleshooting
+
+- **[CLOUDFLARE_IMAGES.md](docs/CLOUDFLARE_IMAGES.md)** - Image upload and AI vision analysis
+  - Upload API documentation
+  - Vision analysis with GPT-4/Gemini
+  - Image transformations and filters
+  - UI component usage
+  - Best practices
+
+- **[QUICKSTART_SEEDING.md](QUICKSTART_SEEDING.md)** - Auto-seed database with Google Places
+  - Quick setup guide
+  - Web interface usage
+  - Command line options
 
 ## API Endpoints
 
@@ -195,6 +394,36 @@ Get weather information and generated maps.
   "mapUrl": "..."
 }
 ```
+
+### POST /api/seed
+Auto-seed database with real venues from Google Places API.
+
+**Request**:
+```json
+{
+  "areas": ["ginza", "osaka"]  // or ["ginza"] or ["osaka"]
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Seeded 27 venues in 18.34s",
+  "results": {
+    "ginza": 15,
+    "osaka": 12,
+    "total": 27
+  },
+  "stats": {
+    "total": 33,
+    "byCategory": [...],
+    "byDistrict": [...]
+  }
+}
+```
+
+**Note**: Requires `GOOGLE_PLACES_API_KEY` secret to be set.
 
 ## Database Schema
 

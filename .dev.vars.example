@@ -1,13 +1,40 @@
 # Development Environment Variables
 # Copy this file to .dev.vars for local development
 # These are only used in local development with `wrangler dev`
+#
+# IMPORTANT: Never commit .dev.vars to Git!
+#
+# Setup:
+# 1. Copy this file: cp .dev.vars.example .dev.vars
+# 2. Add your actual API keys to .dev.vars
+# 3. For production, use: npx wrangler secret put SECRET_NAME
 
-# Cloudflare Account (optional for local dev)
-# CLOUDFLARE_ACCOUNT_ID=your_account_id
+# Google Places API Key (REQUIRED for auto-seeding venues)
+# Get your key: https://console.cloud.google.com
+# Enable: Places API
+GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
 
-# API Keys (if needed for external services)
-# GOOGLE_MAPS_API_KEY=your_api_key
-# OPENWEATHER_API_KEY=your_api_key
+# Optional: Yelp API Key (alternative to Google Places)
+# Get your key: https://fusion.yelp.com
+# YELP_API_KEY=your_yelp_api_key_here
+
+# Optional: OpenWeather API Key (for real weather data)
+# Get your key: https://openweathermap.org/api
+# OPENWEATHER_API_KEY=your_openweather_api_key_here
+
+# AI Provider API Keys (for multi-model chat)
+# OpenAI API Key (for GPT-4, GPT-3.5 models)
+# Get your key: https://platform.openai.com
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Google Gemini API Key (for Gemini 1.5 Pro/Flash models)
+# Get your key: https://aistudio.google.com/app/apikey
+GOOGLE_API_KEY=your_google_api_key_here
+
+# Cloudflare Images (for image upload and editing)
+# Get from: https://dash.cloudflare.com > Account > Images
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+CLOUDFLARE_API_TOKEN=your_cloudflare_api_token
 
 # Development flags
 # DEBUG=true

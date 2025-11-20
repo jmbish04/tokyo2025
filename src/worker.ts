@@ -8,6 +8,11 @@ export interface Env {
   MEMORY: KVNamespace;
   AI: any;
   ASSETS: Fetcher;
+  // Secrets Store bindings
+  OPENAI_API_KEY: { get: () => Promise<string> };
+  GOOGLE_API_KEY: { get: () => Promise<string> };
+  CLOUDFLARE_ACCOUNT_ID: { get: () => Promise<string> };
+  CLOUDFLARE_API_TOKEN: { get: () => Promise<string> };
 }
 
 export default {
