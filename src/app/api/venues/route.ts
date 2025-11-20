@@ -88,10 +88,26 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/venues - Add a manual venue
+ * Requires admin authentication via Authorization: Bearer <ADMIN_API_KEY> header
  * Body: { name, category, district, description, map_url?, rating? }
  */
 export async function POST(request: NextRequest) {
   try {
+    const env = (globalThis as any).env as Env;
+
+    if (!env.DB) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
+    }
+
+    // Authenticate admin user
+    const authenticated = await isAuthenticated(request, env);
+    if (!authenticated) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Admin authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { name, category, district, description, map_url, rating } = body;
 
@@ -100,12 +116,6 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required fields: name, category, district, description' },
         { status: 400 }
       );
-    }
-
-    const env = (globalThis as any).env as Env;
-
-    if (!env.DB) {
-      return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
     }
 
     // Check for duplicates

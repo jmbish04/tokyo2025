@@ -16,6 +16,10 @@ interface Env {
 
 /**
  * GET /api/chats - List all chats
+ *
+ * SECURITY WARNING: This endpoint currently lacks proper authentication.
+ * Before production use, implement user authentication and ensure users can only
+ * access their own chats. Currently defaults to userId='anonymous'.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -76,11 +80,15 @@ export async function POST(request: NextRequest) {
 
 /**
  * PATCH /api/chats - Update a chat
+ *
+ * SECURITY WARNING: This endpoint currently lacks proper authentication.
+ * It verifies userId ownership but defaults to 'anonymous'.
+ * Before production use, implement proper user authentication.
  */
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { chatId, title, model } = body;
+    const { chatId, title, model, userId = 'anonymous' } = body;
 
     if (!chatId) {
       return NextResponse.json({ error: 'Chat ID is required' }, { status: 400 });
@@ -90,6 +98,22 @@ export async function PATCH(request: NextRequest) {
 
     if (!env.DB) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
+    }
+
+    // Verify ownership: check that the chat belongs to the requesting user
+    const chat = await env.DB.prepare('SELECT user_id FROM chats WHERE id = ?')
+      .bind(chatId)
+      .first();
+
+    if (!chat) {
+      return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
+    }
+
+    if (chat.user_id !== userId) {
+      return NextResponse.json(
+        { error: 'Forbidden - You can only modify your own chats' },
+        { status: 403 }
+      );
     }
 
     await updateChat(env.DB, chatId, { title, model });
@@ -106,11 +130,16 @@ export async function PATCH(request: NextRequest) {
 
 /**
  * DELETE /api/chats - Delete a chat
+ *
+ * SECURITY WARNING: This endpoint currently lacks proper authentication.
+ * It verifies userId ownership but defaults to 'anonymous'.
+ * Before production use, implement proper user authentication.
  */
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const chatId = searchParams.get('chatId');
+    const userId = searchParams.get('userId') || 'anonymous';
 
     if (!chatId) {
       return NextResponse.json({ error: 'Chat ID is required' }, { status: 400 });
@@ -120,6 +149,22 @@ export async function DELETE(request: NextRequest) {
 
     if (!env.DB) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
+    }
+
+    // Verify ownership: check that the chat belongs to the requesting user
+    const chat = await env.DB.prepare('SELECT user_id FROM chats WHERE id = ?')
+      .bind(chatId)
+      .first();
+
+    if (!chat) {
+      return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
+    }
+
+    if (chat.user_id !== userId) {
+      return NextResponse.json(
+        { error: 'Forbidden - You can only delete your own chats' },
+        { status: 403 }
+      );
     }
 
     await deleteChat(env.DB, chatId);

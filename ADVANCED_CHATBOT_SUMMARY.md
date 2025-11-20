@@ -105,8 +105,8 @@ To complete your request for the full Vercel AI chatbot experience, we still nee
 | Workers AI Llama 3.1 | ✅ | ✅ | ❌ | ❌ | ⚡⚡ |
 | OpenAI GPT-4 Turbo | ✅ | ✅ | ✅ | ✅ | ⚡ |
 | OpenAI GPT-3.5 Turbo | ✅ | ✅ | ❌ | ❌ | ⚡⚡⚡ |
-| Gemini 1.5 Pro | ✅ | ✅ | ✅ | ✅ | ⚡⚡ |
-| Gemini 1.5 Flash | ✅ | ✅ | ✅ | ❌ | ⚡⚡⚡ |
+| Gemini 2.5 Pro | ✅ | ✅ | ✅ | ✅ | ⚡⚡ |
+| Gemini 2.5 Flash | ✅ | ✅ | ✅ | ✅ | ⚡⚡⚡ |
 
 ## 🎨 Generative UI Examples
 

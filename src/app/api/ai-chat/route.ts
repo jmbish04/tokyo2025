@@ -440,6 +440,8 @@ export async function POST(request: NextRequest) {
     }
 
     // For OpenAI and Gemini, use AI SDK with tool support
+    // NOTE: Admin-only tools (queryLogs, examineTable, getSystemStats) are excluded
+    // from public chat for security. These should only be available in admin contexts.
     const result = await streamText({
       model: aiModel,
       messages: fullMessages,
@@ -449,18 +451,6 @@ export async function POST(request: NextRequest) {
         searchVenues: {
           ...tools.searchVenues,
           execute: async (params) => tools.searchVenues.execute(params, { DB: env.DB }),
-        },
-        queryLogs: {
-          ...tools.queryLogs,
-          execute: async (params) => tools.queryLogs.execute(params, { DB: env.DB }),
-        },
-        examineTable: {
-          ...tools.examineTable,
-          execute: async (params) => tools.examineTable.execute(params, { DB: env.DB }),
-        },
-        getSystemStats: {
-          ...tools.getSystemStats,
-          execute: async (params) => tools.getSystemStats.execute(params, { DB: env.DB }),
         },
       },
       maxTokens: modelConfig.maxTokens,
