@@ -51,7 +51,7 @@ export const AI_MODELS: Record<string, ModelConfig> = {
 
   // OpenAI
   'openai-gpt4': {
-    id: 'gpt-4-turbo-preview',
+    id: 'gpt-4-turbo',
     name: 'GPT-4 Turbo',
     provider: 'openai',
     description: 'Most capable OpenAI model with vision support',
