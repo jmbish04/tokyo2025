@@ -25,7 +25,7 @@ export function getEnv(): Env {
     const { env } = getRequestContext();
     return env as Env;
   } catch (error) {
-    // In development, return a mock env
+    // Throw an error if bindings are not available (e.g., in local development)
     console.warn('Failed to get Cloudflare bindings - may be in development mode');
     throw new Error('Cloudflare bindings not available');
   }
