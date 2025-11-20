@@ -118,13 +118,19 @@ npx wrangler dev
 ### Production Deployment
 
 ```bash
-# Build and deploy
-npm run build
-npm run deploy
-
-# Or use Wrangler directly
+# Build for Cloudflare Pages and deploy
+npm run pages:build
 npx wrangler deploy
+
+# Or use the deploy script
+npm run deploy
 ```
+
+**Note**: For Cloudflare Pages automatic deployments, set the build command to:
+```
+npx @cloudflare/next-on-pages
+```
+This will automatically run `next build` and then package for Cloudflare Workers.
 
 **Expected Output**:
 ```
@@ -363,13 +369,16 @@ npx wrangler kv:namespace list
 
 ```bash
 # Clear cache
-rm -rf .next node_modules
+rm -rf .next .vercel node_modules
 
 # Reinstall
 npm install
 
-# Rebuild
+# Rebuild for Next.js only
 npm run build
+
+# Or rebuild for Cloudflare Pages
+npm run pages:build
 ```
 
 ### Issue: AI Binding Not Working
