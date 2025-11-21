@@ -95,6 +95,17 @@ Check that the build output directory is set to `.vercel/output/static` (not `.v
 
 Increase the build timeout in Cloudflare Pages settings (default is usually sufficient, but you can increase to 20-30 minutes if needed)
 
+### Still seeing old/default content after deployment
+
+If you're seeing a default message or old content after deploying:
+
+1. **Force new deployment**: Go to Cloudflare Pages → Deployments → Click "Retry deployment" on the latest build
+2. **Check deployment branch**: Verify Cloudflare Pages is deploying from the branch with your latest changes
+3. **Verify deployment type**: Go to Workers & Pages - you should see ONE "tokyo2025" under Pages (NOT Workers). If you have both a Worker AND a Pages project with the same name, they will conflict
+4. **Check build logs**: Look for "Generated '.vercel/output/static/_worker.js/index.js'" in the deployment logs
+5. **Verify build settings match**: Build command must be `npm run deploy` and output directory `.vercel/output/static`
+6. **Check URL**: Make sure you're accessing the Cloudflare Pages URL (e.g., tokyo2025.pages.dev) not a separate Workers URL
+
 ## Manual Deployments
 
 If you need to deploy manually from your local machine:
