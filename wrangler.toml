@@ -1,5 +1,5 @@
 name = "tokyo2025"
-main = ".vercel/output/static/_worker.js"
+main = ".vercel/output/static/_worker.js/index.js"
 compatibility_date = "2025-11-21"
 compatibility_flags = ["nodejs_compat"]
 
