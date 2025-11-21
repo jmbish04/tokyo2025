@@ -31,7 +31,7 @@ jobs:
         run: npx tsc --noEmit || true
 
       - name: Build for Cloudflare Pages
-        run: npm run pages:build || true
+        run: npx @cloudflare/next-on-pages || true
 
       - name: Apply D1 Migrations
         uses: cloudflare/wrangler-action@v3

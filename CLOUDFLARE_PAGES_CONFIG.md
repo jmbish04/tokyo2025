@@ -32,7 +32,7 @@ This command:
 2. Transforms the Next.js build output into Cloudflare Workers-compatible format
 3. Generates the worker file at `.vercel/output/static/_worker.js/index.js`
 
-**Do NOT use** `npm run build` as the Cloudflare Pages build command, as this only runs Next.js build without the Cloudflare Workers transformation.
+**Important:** Run this command directly (not through npm scripts) to avoid recursive build issues.
 
 ### Build Output Directory: `.vercel/output/static`
 
@@ -94,23 +94,32 @@ Increase the build timeout in Cloudflare Pages settings (default is usually suff
 
 ## Alternative: Deploy via Wrangler CLI
 
-If you prefer not to use Cloudflare Pages automatic deployments, you can deploy manually:
+If you prefer not to use Cloudflare Pages automatic deployments, you can deploy manually using the deploy commands:
 
 ```bash
-# Build and deploy locally
-npm run pages:build
-npx wrangler deploy
+# Standard deploy (no migrations)
+npm run deploy
 ```
 
-Or use the combined command:
+For deployments with database migrations:
 
 ```bash
-npm run deploy
+npm run deploy:with-migrations
+```
+
+Or build and deploy separately:
+
+```bash
+# Build for Cloudflare
+npx @cloudflare/next-on-pages
+
+# Then deploy
+npx wrangler deploy
 ```
 
 ## GitHub Actions
 
-The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that automatically deploys on push to `main` or `claude/*` branches. It uses the correct build command (`npm run pages:build`).
+The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that automatically deploys on push to `main` or `claude/*` branches. It uses the correct build command (`npx @cloudflare/next-on-pages`).
 
 Make sure these secrets are set in your GitHub repository:
 - `CLOUDFLARE_API_TOKEN`

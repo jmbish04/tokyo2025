@@ -2,48 +2,47 @@
 
 ## Main Deployment Commands
 
-### Full Deployment (Recommended)
+### Standard Deployment (Recommended)
 ```bash
 npm run deploy
 ```
 
 **What it does:**
 1. ✓ Type checks the code (shows errors but doesn't fail)
-2. ✓ Builds Next.js application
-3. ✓ Transforms for Cloudflare Workers using `@cloudflare/next-on-pages`
-4. ✓ Applies database migrations to production D1
-5. ✓ Deploys to Cloudflare Workers
+2. ✓ Builds for Cloudflare Workers using `@cloudflare/next-on-pages`
+3. ✓ Deploys to Cloudflare Workers
 
-**Use this when:** You want to deploy with all checks and migrations.
+**Use this when:** Regular deployments without database changes.
 
 ---
 
-### Quick Deployment (Skip Migrations)
+### Full Deployment (With Migrations)
 ```bash
-npm run deploy:skip-migrations
+npm run deploy:with-migrations
 ```
 
 **What it does:**
-1. ✓ Builds for Cloudflare Pages
-2. ✓ Deploys to Cloudflare Workers
+1. ✓ Type checks the code
+2. ✓ Builds for Cloudflare Workers
+3. ✓ Applies database migrations to production D1
+4. ✓ Deploys to Cloudflare Workers
+
+**Use this when:** You have database schema changes to deploy.
+
+---
+
+### Quick Local Deployment
+```bash
+npm run deploy:local
+```
+
+**What it does:**
+1. ✓ Builds for Cloudflare Workers
+2. ✓ Deploys immediately
 3. ✗ Skips type checking
-4. ✗ Skips database migrations
+4. ✗ Skips migrations
 
-**Use this when:** You're deploying code changes without database schema changes.
-
----
-
-### Force Deployment
-```bash
-npm run deploy:force
-```
-
-**What it does:**
-- Same as `deploy:skip-migrations`
-- No type checking, no migrations
-- Just build and deploy
-
-**Use this when:** You need to deploy quickly and you've already validated everything.
+**Use this when:** Quick local testing deployments.
 
 ---
 
@@ -55,20 +54,22 @@ npm run typecheck
 ```
 Runs TypeScript compiler in check mode (no output, just validation).
 
-### Build Next.js Only
+### Build Next.js
 ```bash
 npm run build
 ```
-Builds the Next.js application (doesn't transform for Cloudflare).
+Builds the Next.js application only (doesn't transform for Cloudflare).
 
-### Build for Cloudflare Pages
+### Build for Cloudflare Workers
 ```bash
-npm run pages:build
+npx @cloudflare/next-on-pages
 ```
-Runs the complete Cloudflare Pages build:
+Runs the complete Cloudflare Workers build:
 - Executes `next build` automatically
 - Transforms output for Cloudflare Workers
 - Generates `.vercel/output/static/_worker.js/index.js`
+
+**This is the command used by Cloudflare Pages automatic deployments.**
 
 ---
 
@@ -173,6 +174,8 @@ npx @cloudflare/next-on-pages
 Next.js
 ```
 
+**Note:** This command must be run directly (not through npm scripts) to avoid recursive build issues.
+
 For detailed Cloudflare Pages configuration, see [CLOUDFLARE_PAGES_CONFIG.md](./CLOUDFLARE_PAGES_CONFIG.md).
 
 ---
@@ -244,11 +247,11 @@ The workflow automatically:
 
 | Command | Type Check | Build | Migrate | Deploy |
 |---------|-----------|-------|---------|--------|
-| `deploy` | ✓ (warn) | ✓ | ✓ | ✓ |
-| `deploy:skip-migrations` | ✗ | ✓ | ✗ | ✓ |
-| `deploy:force` | ✗ | ✓ | ✗ | ✓ |
-| `pages:build` | ✗ | ✓ | ✗ | ✗ |
+| `deploy` | ✓ (warn) | ✓ (Cloudflare) | ✗ | ✓ |
+| `deploy:with-migrations` | ✓ (warn) | ✓ (Cloudflare) | ✓ | ✓ |
+| `deploy:local` | ✗ | ✓ (Cloudflare) | ✗ | ✓ |
 | `build` | ✗ | ✓ (Next.js only) | ✗ | ✗ |
+| `npx @cloudflare/next-on-pages` | ✗ | ✓ (Cloudflare) | ✗ | ✗ |
 
 ---
 
