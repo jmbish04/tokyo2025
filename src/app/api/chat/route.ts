@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getEnv } from '@/lib/cloudflare';
 
 export const runtime = 'edge';
-
-interface Env {
-  DB: D1Database;
-  MEMORY: KVNamespace;
-  AI: any;
-}
 
 interface Venue {
   id: number;
@@ -29,8 +24,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get env bindings from the request context
-    const env = process.env as unknown as Env;
+    // Get Cloudflare bindings
+    const env = getEnv();
 
     // Query D1 for relevant venues based on the message
     let venues: Venue[] = [];

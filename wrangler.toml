@@ -1,21 +1,39 @@
 name = "tokyo2025"
-main = "src/worker.ts"
-compatibility_date = "2024-06-01"
+main = ".vercel/output/static/_worker.js/index.js"
+compatibility_date = "2025-11-21"
+compatibility_flags = ["nodejs_compat"]
 
-# Observability (with enhanced sampling for debugging secrets)
+# Secrets Store
+# Get your store ID by running: npx wrangler secrets-store store list --remote
+[[secrets_store_secrets]]
+binding = "OPENAI_API_KEY"
+store_id = "8c42fa70938644e0a8a109744467375f"
+secret_name = "OPENAI_API_KEY"
+
+[[secrets_store_secrets]]
+binding = "GOOGLE_API_KEY"
+store_id = "8c42fa70938644e0a8a109744467375f"
+secret_name = "GOOGLE_API_KEY"
+
+[[secrets_store_secrets]]
+binding = "CLOUDFLARE_ACCOUNT_ID"
+store_id = "8c42fa70938644e0a8a109744467375f"
+secret_name = "CLOUDFLARE_ACCOUNT_ID"
+
+[[secrets_store_secrets]]
+binding = "CLOUDFLARE_API_TOKEN"
+store_id = "8c42fa70938644e0a8a109744467375f"
+secret_name = "CLOUDFLARE_API_TOKEN"
+
+[[secrets_store_secrets]]
+binding = "ADMIN_API_KEY"
+store_id = "8c42fa70938644e0a8a109744467375f"
+secret_name = "WORKER_API_KEY"
+
+# Observability
 [observability]
 enabled = true
 head_sampling_rate = 1.0  # 100% sampling for debugging, reduce to 0.1-0.01 in production
-
-# Secrets Store - TODO: Replace STORE_ID_HERE with actual store ID
-# Get your store ID by running: npx wrangler secrets-store store list --remote
-secrets_store_secrets = [
-  { binding = "OPENAI_API_KEY", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "OPENAI_API_KEY" },
-  { binding = "GOOGLE_API_KEY", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "GOOGLE_API_KEY" },
-  { binding = "CLOUDFLARE_ACCOUNT_ID", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "CLOUDFLARE_ACCOUNT_ID" },
-  { binding = "CLOUDFLARE_API_TOKEN", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "CLOUDFLARE_API_TOKEN" },
-  { binding = "ADMIN_API_KEY", store_id = "8c42fa70938644e0a8a109744467375f", secret_name = "WORKER_API_KEY" }
-]
 
 # D1 Database
 [[d1_databases]]
@@ -35,8 +53,3 @@ binding = "AI"
 # Analytics
 [[analytics_engine_datasets]]
 binding = "ANALYTICS"
-
-# Static Assets
-[assets]
-directory = "./public"
-binding = "ASSETS"
