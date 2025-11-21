@@ -2,7 +2,7 @@
 
 ## Main Deployment Commands
 
-### Standard Deployment (Recommended)
+### Cloudflare Pages CI/CD (Primary Method)
 ```bash
 npm run deploy
 ```
@@ -10,24 +10,25 @@ npm run deploy
 **What it does:**
 1. ✓ Type checks the code (shows errors but doesn't fail)
 2. ✓ Builds for Cloudflare Workers using `@cloudflare/next-on-pages`
-3. ✓ Deploys to Cloudflare Workers
+3. ✓ Applies database migrations to production D1
 
-**Use this when:** Regular deployments without database changes.
+**This is used by Cloudflare Pages automatic deployments.**
+Cloudflare Pages handles the actual deployment after the build completes.
 
 ---
 
-### Full Deployment (With Migrations)
+### Manual Deployment (Local)
 ```bash
-npm run deploy:with-migrations
+npm run deploy:manual
 ```
 
 **What it does:**
 1. ✓ Type checks the code
 2. ✓ Builds for Cloudflare Workers
 3. ✓ Applies database migrations to production D1
-4. ✓ Deploys to Cloudflare Workers
+4. ✓ Deploys to Cloudflare Workers via wrangler
 
-**Use this when:** You have database schema changes to deploy.
+**Use this when:** Deploying manually from your local machine.
 
 ---
 
@@ -38,11 +39,11 @@ npm run deploy:local
 
 **What it does:**
 1. ✓ Builds for Cloudflare Workers
-2. ✓ Deploys immediately
+2. ✓ Deploys immediately via wrangler
 3. ✗ Skips type checking
 4. ✗ Skips migrations
 
-**Use this when:** Quick local testing deployments.
+**Use this when:** Quick local testing deployments without migrations.
 
 ---
 
@@ -161,7 +162,7 @@ If you're using Cloudflare Pages automatic deployments (recommended), configure:
 
 **Build command:**
 ```
-npx @cloudflare/next-on-pages
+npm run deploy
 ```
 
 **Build output directory:**
@@ -174,51 +175,35 @@ npx @cloudflare/next-on-pages
 Next.js
 ```
 
-**Note:** This command must be run directly (not through npm scripts) to avoid recursive build issues.
+**What happens:**
+- Cloudflare Pages runs `npm run deploy` which builds and applies migrations
+- Cloudflare Pages then automatically deploys the built output
 
 For detailed Cloudflare Pages configuration, see [CLOUDFLARE_PAGES_CONFIG.md](./CLOUDFLARE_PAGES_CONFIG.md).
 
 ---
 
-## GitHub Actions
-
-The project includes automatic deployments via GitHub Actions (`.github/workflows/deploy.yml`).
-
-**Triggers:**
-- Push to `main` branch
-- Push to `claude/*` branches
-
-**Required secrets:**
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
-
-The workflow automatically:
-1. Checks types (non-blocking)
-2. Builds for Cloudflare Pages
-3. Applies database migrations
-4. Deploys to Cloudflare Workers
-
----
-
 ## Deployment Checklist
 
-### First Time Deployment
+### First Time Setup
 - [ ] Run `npm run cf:login`
 - [ ] Run `npm run cf:init` (create DB and KV)
 - [ ] Update `wrangler.toml` with database_id and KV id
-- [ ] Set required secrets (OPENAI_API_KEY, etc.)
-- [ ] Run `npm run db:migrate`
-- [ ] Run `npm run deploy`
+- [ ] Set required secrets (OPENAI_API_KEY, etc.) in Cloudflare dashboard
+- [ ] Connect repository to Cloudflare Pages
+- [ ] Set build command: `npm run deploy`
+- [ ] Set output directory: `.vercel/output/static`
 
-### Regular Deployments
+### Regular Deployments (Cloudflare Pages)
 - [ ] Make your code changes
 - [ ] Test locally with `npm run dev`
-- [ ] Run `npm run deploy`
+- [ ] Push to your repository
+- [ ] Cloudflare Pages automatically builds and deploys
 
-### If Using Cloudflare Pages
-- [ ] Set build command: `npx @cloudflare/next-on-pages`
-- [ ] Set output directory: `.vercel/output/static`
-- [ ] Push to GitHub (automatic deployment)
+### Manual Deployments (Local)
+- [ ] Make your code changes
+- [ ] Test locally with `npm run dev`
+- [ ] Run `npm run deploy:manual`
 
 ---
 
@@ -247,9 +232,9 @@ The workflow automatically:
 
 | Command | Type Check | Build | Migrate | Deploy |
 |---------|-----------|-------|---------|--------|
-| `deploy` | ✓ (warn) | ✓ (Cloudflare) | ✗ | ✓ |
-| `deploy:with-migrations` | ✓ (warn) | ✓ (Cloudflare) | ✓ | ✓ |
-| `deploy:local` | ✗ | ✓ (Cloudflare) | ✗ | ✓ |
+| `deploy` (CF Pages) | ✓ (warn) | ✓ (Cloudflare) | ✓ | Auto (CF Pages) |
+| `deploy:manual` | ✓ (warn) | ✓ (Cloudflare) | ✓ | ✓ (wrangler) |
+| `deploy:local` | ✗ | ✓ (Cloudflare) | ✗ | ✓ (wrangler) |
 | `build` | ✗ | ✓ (Next.js only) | ✗ | ✗ |
 | `npx @cloudflare/next-on-pages` | ✗ | ✓ (Cloudflare) | ✗ | ✗ |
 
