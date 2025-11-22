@@ -5,10 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
-    "build": "npx @cloudflare/next-on-pages",
+    "build": "next build",
+    "pages:build": "npx @cloudflare/next-on-pages",
     "typecheck": "tsc --noEmit",
     "start": "next start",
-    "deploy": "npm run build && npx wrangler pages deploy .vercel/output/static --project-name tokyo2025",
+    "deploy": "npm run pages:build && npx wrangler pages deploy .vercel/output/static --project-name tokyo2025",
     "deploy:manual": "(npm run typecheck || true) && npx @cloudflare/next-on-pages && npm run db:migrate && wrangler deploy",
     "deploy:local": "npx @cloudflare/next-on-pages && wrangler deploy",
     "preview": "npx @cloudflare/next-on-pages && wrangler dev",
