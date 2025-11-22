@@ -369,7 +369,7 @@ function createTools(db: D1Database) {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as {
-      messages: Array<{ role: string; content: string }>;
+      messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
       model?: string;
       chatId?: string;
       systemPrompt?: string;
@@ -463,7 +463,7 @@ export async function POST(request: NextRequest) {
     // from public chat for security. These should only be available in admin contexts.
     const tools = createTools(env.DB);
     const result = await streamText({
-      model: aiModel,
+      model: aiModel as any,
       messages: fullMessages,
       tools: {
         getWeather: tools.getWeather,
