@@ -52,31 +52,35 @@ const apiToken = await env.CLOUDFLARE_API_TOKEN.get();
 
 Note: Secrets Store bindings require `.get()` to retrieve the value asynchronously.
 
-## Static Assets Configuration ✅
+## Static Assets Handling ✅
 
-Added `[assets]` configuration to properly serve Next.js static files:
+The Next.js application uses `@cloudflare/next-on-pages` which handles static assets automatically.
+
+### How It Works
+
+The `@cloudflare/next-on-pages` adapter:
+- Generates a worker file at `.vercel/output/static/_worker.js/index.js`
+- Bundles all static assets (CSS, JS, images) into the worker
+- Handles serving these assets internally
+
+**Important:** Do NOT add a separate `[assets]` configuration in wrangler.toml. The adapter already manages all static files within the worker itself. Adding an assets binding pointing to the same directory will cause conflicts and internal server errors.
+
+### Configuration
+
+The correct wrangler.toml configuration is:
 
 ```toml
-[assets]
-directory = ".vercel/output/static"
-binding = "ASSETS"
+name = "tokyo2025"
+main = ".vercel/output/static/_worker.js/index.js"
+compatibility_date = "2025-11-21"
+compatibility_flags = ["nodejs_compat"]
 ```
 
-### Why This Is Required
-
-The Next.js application built with `@cloudflare/next-on-pages` generates:
-- A worker file at `.vercel/output/static/_worker.js/index.js`
-- Static assets (CSS, JS, images) in `.vercel/output/static/`
-
-The worker code expects an `ASSETS` binding to fetch and serve these static files. Without this configuration:
-- ❌ CSS files won't load (unstyled HTML)
-- ❌ JavaScript bundles won't execute (broken functionality)
-- ❌ Images and other assets won't display
-
-With the assets configuration:
-- ✅ All static files are uploaded to Cloudflare
-- ✅ Worker can fetch them via the `ASSETS` binding
-- ✅ Full Next.js functionality works correctly
+This is all that's needed - the worker at the `main` path handles everything, including:
+- ✅ Serving CSS stylesheets
+- ✅ Serving JavaScript bundles
+- ✅ Serving images and static assets
+- ✅ Routing and API endpoints
 
 ## Complete Bindings List
 
@@ -86,11 +90,10 @@ The worker has access to these bindings:
 2. **MEMORY** - KV Namespace for caching
 3. **AI** - Cloudflare AI for Workers AI models
 4. **ANALYTICS** - Analytics Engine for tracking
-5. **ASSETS** - Static assets for Next.js files
-6. **OPENAI_API_KEY** - OpenAI API access (Secrets Store)
-7. **GOOGLE_API_KEY** - Google Gemini API access (Secrets Store)
-8. **CLOUDFLARE_ACCOUNT_ID** - Account ID (Secrets Store)
-9. **CLOUDFLARE_API_TOKEN** - API Token (Secrets Store)
+5. **OPENAI_API_KEY** - OpenAI API access (Secrets Store)
+6. **GOOGLE_API_KEY** - Google Gemini API access (Secrets Store)
+7. **CLOUDFLARE_ACCOUNT_ID** - Account ID (Secrets Store)
+8. **CLOUDFLARE_API_TOKEN** - API Token (Secrets Store)
 
 ## Deployment
 
@@ -137,13 +140,21 @@ This warning appears with Wrangler 3.x but doesn't affect functionality. To remo
 npm install --save-dev wrangler@4
 ```
 
+### Internal Server Error
+
+If you see an internal server error:
+1. **Remove any `[assets]` configuration** - @cloudflare/next-on-pages handles assets internally
+2. Ensure only `main = ".vercel/output/static/_worker.js/index.js"` is specified
+3. Rebuild: `npm run deploy`
+4. Redeploy
+
 ### Unstyled HTML After Deployment
 
 If the site loads but without styling:
-1. Verify the `[assets]` section exists in wrangler.toml
-2. Ensure the build output exists at `.vercel/output/static/`
-3. Rebuild: `npm run deploy`
-4. Redeploy
+1. Ensure the build completed successfully
+2. Verify the build output exists at `.vercel/output/static/`
+3. Check that `main` points to `.vercel/output/static/_worker.js/index.js`
+4. Rebuild and redeploy
 
 ### Secrets Not Working
 
