@@ -1,5 +1,6 @@
-import { openai } from '@ai-sdk/openai';
-import { google } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import type { LanguageModelV1 } from 'ai';
 import type { AIProvider } from './ai-config';
 
 interface Env {
@@ -8,11 +9,21 @@ interface Env {
   GOOGLE_API_KEY: { get: () => Promise<string> };
 }
 
+// Type for Workers AI model (custom object, not compatible with AI SDK)
+export type WorkersAIModel = {
+  provider: 'workers-ai';
+  modelId: string;
+  binding: any;
+};
+
+// Union type for all supported AI models
+export type AIModelInstance = LanguageModelV1 | WorkersAIModel;
+
 /**
  * Get AI model instance based on provider and model ID
  * Now uses Secrets Store bindings (async)
  */
-export async function getAIModel(provider: AIProvider, modelId: string, env: Env) {
+export async function getAIModel(provider: AIProvider, modelId: string, env: Env): Promise<AIModelInstance> {
   switch (provider) {
     case 'workers-ai':
       return {
@@ -28,9 +39,10 @@ export async function getAIModel(provider: AIProvider, modelId: string, env: Env
       if (!openaiKey) {
         throw new Error('OpenAI API key not configured');
       }
-      return openai(modelId, {
+      const openai = createOpenAI({
         apiKey: openaiKey,
       });
+      return openai(modelId);
     }
 
     case 'gemini': {
@@ -40,9 +52,10 @@ export async function getAIModel(provider: AIProvider, modelId: string, env: Env
       if (!googleKey) {
         throw new Error('Google API key not configured');
       }
-      return google(modelId, {
+      const google = createGoogleGenerativeAI({
         apiKey: googleKey,
       });
+      return google(modelId);
     }
 
     default:

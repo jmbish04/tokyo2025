@@ -53,7 +53,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as {
+      title: string;
+      model?: string;
+      userId?: string;
+    };
     const { title, model = 'workers-ai-reasoning', userId = 'anonymous' } = body;
 
     if (!title) {
@@ -87,7 +91,12 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as {
+      chatId: string;
+      title?: string;
+      model?: string;
+      userId?: string;
+    };
     const { chatId, title, model, userId = 'anonymous' } = body;
 
     if (!chatId) {

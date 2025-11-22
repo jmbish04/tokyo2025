@@ -51,7 +51,7 @@ export async function getChats(db: D1Database, userId: string = 'anonymous', lim
     'SELECT * FROM chats WHERE user_id = ? ORDER BY updated_at DESC LIMIT ?'
   ).bind(userId, limit).all();
 
-  return results as Chat[];
+  return results as unknown as Chat[];
 }
 
 /**
@@ -139,7 +139,7 @@ export async function getMessages(db: D1Database, chatId: string): Promise<Messa
     'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
   ).bind(chatId).all();
 
-  return results as Message[];
+  return results as unknown as Message[];
 }
 
 /**
@@ -165,5 +165,5 @@ export async function getChatsWithMessageCount(db: D1Database, userId: string = 
     LIMIT ?
   `).bind(userId, limit).all();
 
-  return results as (Chat & { message_count: number })[];
+  return results as unknown as (Chat & { message_count: number })[];
 }

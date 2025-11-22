@@ -108,7 +108,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    const body = (await request.json()) as {
+      name: string;
+      category: string;
+      district: string;
+      description: string;
+      map_url?: string;
+      rating?: number;
+    };
     const { name, category, district, description, map_url, rating } = body;
 
     if (!name || !category || !district || !description) {
