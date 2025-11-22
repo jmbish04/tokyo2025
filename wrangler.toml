@@ -2,6 +2,7 @@ name = "tokyo2025"
 main = ".vercel/output/static/_worker.js/index.js"
 compatibility_date = "2025-11-21"
 compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
 
 # Secrets Store
 # Get your store ID by running: npx wrangler secrets-store store list --remote
