@@ -1,7 +1,8 @@
 import { StreamingTextResponse, streamText, tool } from 'ai';
+import type { LanguageModelV1 } from 'ai';
 import { z } from 'zod';
 import { NextRequest } from 'next/server';
-import { getAIModel, TOKYO_SYSTEM_PROMPT } from '@/lib/ai-provider';
+import { getAIModel, TOKYO_SYSTEM_PROMPT, type WorkersAIModel } from '@/lib/ai-provider';
 import { getModelConfig } from '@/lib/ai-config';
 import { addMessage, getMessages, createChat } from '@/lib/chat-history';
 
@@ -462,8 +463,10 @@ export async function POST(request: NextRequest) {
     // NOTE: Admin-only tools (queryLogs, examineTable, getSystemStats) are excluded
     // from public chat for security. These should only be available in admin contexts.
     const tools = createTools(env.DB);
+    
+    // Type assertion: we know aiModel is LanguageModelV1 here because Workers AI is handled above
     const result = await streamText({
-      model: aiModel as any,
+      model: aiModel as LanguageModelV1,
       messages: fullMessages,
       tools: {
         getWeather: tools.getWeather,
