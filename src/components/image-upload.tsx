@@ -13,6 +13,27 @@ interface ImageUploadProps {
   maxSizeMB?: number;
 }
 
+interface UploadResponse {
+  success: boolean;
+  image: {
+    id: string;
+    filename: string;
+    uploaded: string;
+    requireSignedURLs: boolean;
+    variants: string[];
+  };
+}
+
+interface UploadErrorResponse {
+  error: string;
+  details?: unknown;
+}
+
+interface AnalysisResponse {
+  success: boolean;
+  analysis: string;
+}
+
 export function ImageUpload({
   onImageUploaded,
   onError,
@@ -67,11 +88,11 @@ export function ImageUpload({
       });
 
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
+        const errorData = (await uploadResponse.json()) as UploadErrorResponse;
         throw new Error(errorData.error || 'Upload failed');
       }
 
-      const uploadData = await uploadResponse.json();
+      const uploadData = (await uploadResponse.json()) as UploadResponse;
       const imageId = uploadData.image.id;
       const imageUrl = uploadData.image.variants[0]; // Use first variant
 
@@ -96,7 +117,7 @@ export function ImageUpload({
           });
 
           if (analysisResponse.ok) {
-            const analysisData = await analysisResponse.json();
+            const analysisData = (await analysisResponse.json()) as AnalysisResponse;
             setAnalysis(analysisData.analysis);
             onImageUploaded?.(imageUrl, imageId, analysisData.analysis);
           } else {

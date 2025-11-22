@@ -61,7 +61,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { location, generateMap } = await request.json();
+    const { location, generateMap } = (await request.json()) as {
+      location: string;
+      generateMap?: boolean;
+    };
 
     if (!location) {
       return NextResponse.json(

@@ -120,7 +120,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = await uploadResponse.json();
+    const data = (await uploadResponse.json()) as {
+      success: boolean;
+      errors?: unknown;
+      result: {
+        id: string;
+        filename: string;
+        uploaded: string;
+        requireSignedURLs: boolean;
+        variants: string[];
+      };
+    };
 
     if (!data.success) {
       return NextResponse.json(
@@ -190,7 +200,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const data = await imageResponse.json();
+    const data = (await imageResponse.json()) as {
+      success: boolean;
+      errors?: unknown;
+      result: unknown;
+    };
 
     if (!data.success) {
       return NextResponse.json(
