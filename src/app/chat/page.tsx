@@ -108,6 +108,11 @@ export default function ChatPage() {
   };
 
   const models = getAllModels();
+  
+  // Create a reverse lookup map for efficient model key finding
+  const modelIdToKey = Object.fromEntries(
+    Object.entries(AI_MODELS).map(([key, model]) => [model.id, key])
+  );
 
   // Render generative UI components based on tool calls
   const renderMessage = (content: string) => {
@@ -273,21 +278,21 @@ export default function ChatPage() {
           >
             <optgroup label="🚀 Workers AI (Default - Free)">
               {models.filter(m => m.provider === 'workers-ai').map(m => (
-                <option key={m.id} value={Object.keys(AI_MODELS).find(k => AI_MODELS[k].id === m.id)}>
+                <option key={m.id} value={modelIdToKey[m.id]}>
                   {m.name}
                 </option>
               ))}
             </optgroup>
             <optgroup label="🔵 OpenAI">
               {models.filter(m => m.provider === 'openai').map(m => (
-                <option key={m.id} value={Object.keys(AI_MODELS).find(k => AI_MODELS[k].id === m.id)}>
+                <option key={m.id} value={modelIdToKey[m.id]}>
                   {m.name}
                 </option>
               ))}
             </optgroup>
             <optgroup label="🔴 Google Gemini">
               {models.filter(m => m.provider === 'gemini').map(m => (
-                <option key={m.id} value={Object.keys(AI_MODELS).find(k => AI_MODELS[k].id === m.id)}>
+                <option key={m.id} value={modelIdToKey[m.id]}>
                   {m.name}
                 </option>
               ))}

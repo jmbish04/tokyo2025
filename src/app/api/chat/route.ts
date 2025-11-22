@@ -13,6 +13,25 @@ interface Venue {
   rating: number;
 }
 
+// Type guard to check if an object is a valid Venue
+function isVenue(obj: unknown): obj is Venue {
+  const r = obj as Record<string, unknown>;
+  return (
+    typeof r.id === 'number' &&
+    typeof r.name === 'string' &&
+    typeof r.category === 'string' &&
+    typeof r.district === 'string' &&
+    typeof r.description === 'string' &&
+    typeof r.map_url === 'string' &&
+    typeof r.rating === 'number'
+  );
+}
+
+// Helper to safely cast D1 results to Venue[]
+function asVenues(results: unknown[]): Venue[] {
+  return results.filter(isVenue);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { message } = await request.json() as { message: string };
@@ -49,7 +68,7 @@ export async function POST(request: NextRequest) {
       query += ' LIMIT 3';
 
       const { results } = await env.DB.prepare(query).all();
-      venues = results as unknown as Venue[];
+      venues = asVenues(results as unknown[]);
     } catch (dbError) {
       console.error('Database query error:', dbError);
       // Continue without venues if DB fails
