@@ -65,14 +65,14 @@ export async function GET(request: NextRequest) {
       .prepare(`SELECT COUNT(*) as count FROM api_logs WHERE timestamp >= ${timeFilter}`)
       .all();
 
-    const totalRequests = totalRequestsResult[0]?.count || 0;
+    const totalRequests = Number(totalRequestsResult[0]?.count || 0);
 
     // Error count
     const { results: errorCountResult } = await env.DB
       .prepare(`SELECT COUNT(*) as count FROM api_logs WHERE timestamp >= ${timeFilter} AND status_code >= 400`)
       .all();
 
-    const errorCount = errorCountResult[0]?.count || 0;
+    const errorCount = Number(errorCountResult[0]?.count || 0);
 
     // Error rate
     const errorRate = totalRequests > 0 ? (errorCount / totalRequests) * 100 : 0;

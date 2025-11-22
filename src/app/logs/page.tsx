@@ -30,7 +30,7 @@ export default function LogsPage() {
       if (endpoint) params.append('endpoint', endpoint);
 
       const response = await fetch(`/api/logs?${params}`);
-      const data = await response.json();
+      const data = await response.json() as { logs?: any[] };
       setLogs(data.logs || []);
     } catch (error) {
       console.error('Failed to fetch logs:', error);
@@ -358,8 +358,7 @@ export default function LogsPage() {
                 <tbody>
                   {logs.map((log, idx) => (
                     <tr key={log.id || idx} style={{
-                      borderBottom: '1px solid var(--border)',
-                      '&:hover': { background: 'var(--bg-tertiary)' }
+                      borderBottom: '1px solid var(--border)'
                     }}>
                       <td style={{ padding: '0.75rem', whiteSpace: 'nowrap' }}>
                         {formatDate(log.timestamp)}

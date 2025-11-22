@@ -75,7 +75,7 @@ export class VenueSeeder {
     url.searchParams.set('key', this.apiKey);
 
     const response = await fetch(url.toString());
-    const data = await response.json();
+    const data = await response.json() as { status: string; result?: any };
 
     if (data.status !== 'OK') {
       console.warn(`Failed to get details for place ${placeId}: ${data.status}`);

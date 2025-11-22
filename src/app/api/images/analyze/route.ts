@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateText } from 'ai';
-import { openai } from '@ai-sdk/openai';
-import { google } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
 export const runtime = 'edge';
 
@@ -17,7 +17,12 @@ interface Env {
 export async function POST(request: NextRequest) {
   try {
     const env = (globalThis as any).env as Env;
-    const body = await request.json();
+    const body = await request.json() as {
+      imageUrl?: string;
+      imageId?: string;
+      prompt?: string;
+      model?: string;
+    };
     const {
       imageUrl,
       imageId,
@@ -46,7 +51,8 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         );
       }
-      visionModel = openai('gpt-4-turbo', { apiKey: openaiKey });
+      const openaiProvider = createOpenAI({ apiKey: openaiKey });
+      visionModel = openaiProvider('gpt-4-turbo');
       modelProvider = 'openai';
     } else if (model.startsWith('gemini')) {
       const googleKey = await env.GOOGLE_API_KEY.get();
@@ -58,7 +64,8 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         );
       }
-      visionModel = google('gemini-1.5-pro-latest', { apiKey: googleKey });
+      const googleProvider = createGoogleGenerativeAI({ apiKey: googleKey });
+      visionModel = googleProvider('gemini-1.5-pro-latest');
       modelProvider = 'gemini';
     } else {
       return NextResponse.json(

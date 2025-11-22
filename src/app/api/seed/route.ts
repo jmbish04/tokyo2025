@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => ({})) as { areas?: string[]; apiKey?: string };
     const { areas, apiKey: bodyApiKey } = body;
 
     // Get API key from body, environment variable, or fail
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     const results = await seedDatabase(
       apiKey,
       env.DB,
-      areas || ['ginza', 'osaka']
+      (areas || ['ginza', 'osaka']) as ('ginza' | 'osaka')[]
     );
 
     const duration = Date.now() - startTime;

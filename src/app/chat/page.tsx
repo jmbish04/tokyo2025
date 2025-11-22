@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useChat } from '@ai-sdk/react';
 import Link from 'next/link';
-import { getAllModels, getModelConfig, type ModelConfig } from '@/lib/ai-config';
+import { getAllModels, getModelConfig, type ModelConfig, AI_MODELS } from '@/lib/ai-config';
 import { WeatherCard } from '@/components/generative/weather-card';
 import { SubwayMap } from '@/components/generative/subway-map';
 import { AttractionCard } from '@/components/generative/attraction-card';
@@ -54,7 +54,7 @@ export default function ChatPage() {
     setLoadingChats(true);
     try {
       const response = await fetch('/api/chats?withCount=true');
-      const data = await response.json();
+      const data = await response.json() as { chats?: any[] };
       setChats(data.chats || []);
     } catch (error) {
       console.error('Failed to load chats:', error);
@@ -71,7 +71,7 @@ export default function ChatPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, model: selectedModel }),
       });
-      const data = await response.json();
+      const data = await response.json() as { chat: { id: string } };
       setCurrentChatId(data.chat.id);
       await loadChats();
     } catch (error) {
@@ -108,6 +108,11 @@ export default function ChatPage() {
   };
 
   const models = getAllModels();
+  
+  // Create a reverse lookup map for efficient model key finding
+  const modelIdToKey = Object.fromEntries(
+    Object.entries(AI_MODELS).map(([key, model]) => [model.id, key])
+  );
 
   // Render generative UI components based on tool calls
   const renderMessage = (content: string) => {
@@ -273,21 +278,21 @@ export default function ChatPage() {
           >
             <optgroup label="🚀 Workers AI (Default - Free)">
               {models.filter(m => m.provider === 'workers-ai').map(m => (
-                <option key={m.id} value={Object.keys(getAllModels()).find(k => getAllModels()[k].id === m.id)}>
+                <option key={m.id} value={modelIdToKey[m.id]}>
                   {m.name}
                 </option>
               ))}
             </optgroup>
             <optgroup label="🔵 OpenAI">
               {models.filter(m => m.provider === 'openai').map(m => (
-                <option key={m.id} value={Object.keys(getAllModels()).find(k => getAllModels()[k].id === m.id)}>
+                <option key={m.id} value={modelIdToKey[m.id]}>
                   {m.name}
                 </option>
               ))}
             </optgroup>
             <optgroup label="🔴 Google Gemini">
               {models.filter(m => m.provider === 'gemini').map(m => (
-                <option key={m.id} value={Object.keys(getAllModels()).find(k => getAllModels()[k].id === m.id)}>
+                <option key={m.id} value={modelIdToKey[m.id]}>
                   {m.name}
                 </option>
               ))}

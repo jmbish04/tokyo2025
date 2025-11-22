@@ -80,7 +80,7 @@ export default function SeedPage() {
     setLoading(true);
     try {
       const response = await fetch('/api/seed');
-      const data = await response.json();
+      const data = await response.json() as SeedStatus;
       setStatus(data);
       setShowApiKeyInput(!data.configured.apiKey);
     } catch (err) {
@@ -94,7 +94,7 @@ export default function SeedPage() {
     setLoadingVenues(true);
     try {
       const response = await fetch('/api/venues?limit=6');
-      const data = await response.json();
+      const data = await response.json() as { venues?: Venue[] };
       setRecentVenues(data.venues || []);
     } catch (err) {
       console.error('Failed to fetch venues:', err);
@@ -130,7 +130,7 @@ export default function SeedPage() {
         body: JSON.stringify(body),
       });
 
-      const data = await response.json();
+      const data = await response.json() as SeedResult & { error?: string };
 
       if (response.ok) {
         setResult(data);
@@ -164,7 +164,7 @@ export default function SeedPage() {
         body: JSON.stringify(manualVenue),
       });
 
-      const data = await response.json();
+      const data = await response.json() as { venue?: Venue; error?: string };
 
       if (response.ok) {
         // Reset form
@@ -182,7 +182,7 @@ export default function SeedPage() {
         fetchStatus();
         fetchRecentVenues();
 
-        alert(`✅ ${data.venue.name} added successfully!`);
+        alert(`✅ ${data.venue?.name} added successfully!`);
       } else {
         setError(data.error || 'Failed to add venue');
       }

@@ -58,7 +58,7 @@ export default function Home() {
         throw new Error('Failed to get response');
       }
 
-      const data = await response.json();
+      const data = await response.json() as { response: string; venues?: any[] };
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.response,
@@ -96,7 +96,7 @@ export default function Home() {
         throw new Error('Upload failed');
       }
 
-      const data = await response.json();
+      const data = await response.json() as { url?: string };
       setMessages((prev) => [
         ...prev,
         {

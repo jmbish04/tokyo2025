@@ -27,8 +27,9 @@ export function WeatherCard({
       // Fetch weather data if not provided
       fetch(`/api/weather?location=${encodeURIComponent(location)}`)
         .then(res => res.json())
-        .then(data => {
-          setWeatherData(data.weather);
+        .then((data: unknown) => {
+          const typedData = data as { weather?: any };
+          setWeatherData(typedData.weather);
           setLoading(false);
         })
         .catch(() => setLoading(false));
