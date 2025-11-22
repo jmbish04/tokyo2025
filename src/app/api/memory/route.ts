@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 // POST - Store a memory entry
 export async function POST(request: NextRequest) {
   try {
-    const { message, response, venues } = await request.json();
+    const { message, response, venues } = await request.json() as { message: string; response: string; venues?: number[] };
 
     if (!message || !response) {
       return NextResponse.json(

@@ -15,7 +15,7 @@ interface Venue {
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
+    const { message } = await request.json() as { message: string };
 
     if (!message) {
       return NextResponse.json(
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       query += ' LIMIT 3';
 
       const { results } = await env.DB.prepare(query).all();
-      venues = results as Venue[];
+      venues = results as unknown as Venue[];
     } catch (dbError) {
       console.error('Database query error:', dbError);
       // Continue without venues if DB fails
