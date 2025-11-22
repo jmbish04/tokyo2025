@@ -1,11 +1,9 @@
 name = "tokyo2025"
-main = ".vercel/output/static/_worker.js/index.js"
 compatibility_date = "2025-11-21"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
 
 # Secrets Store
-# Get your store ID by running: npx wrangler secrets-store store list --remote
 [[secrets_store_secrets]]
 binding = "OPENAI_API_KEY"
 store_id = "8c42fa70938644e0a8a109744467375f"
@@ -34,7 +32,7 @@ secret_name = "WORKER_API_KEY"
 # Observability
 [observability]
 enabled = true
-head_sampling_rate = 1.0  # 100% sampling for debugging, reduce to 0.1-0.01 in production
+head_sampling_rate = 1.0
 
 # D1 Database
 [[d1_databases]]
